@@ -116,6 +116,7 @@ class Aarambha_DS_Admin
 
     /**
      * When admin init runs.
+     * https://yoursite.com/wp-admin/admin.php?page=your-plugin-page&_clear=cache
      */
     public function onAdminInit()
     {
@@ -341,5 +342,4 @@ class Aarambha_DS_Admin
             Aarambha_DS()->view('complete');
         }
     }
-
 }
