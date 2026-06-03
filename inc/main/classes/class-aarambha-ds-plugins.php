@@ -114,7 +114,7 @@ class Aarambha_DS_Plugins
     }
 
     /**
-     * Sets the plugins.
+     * Sets the plugins, auto-injecting WooCommerce when the demo requires it.
      * 
      * @param array $demo Demo retrieved from the API.
      * 
@@ -122,10 +122,39 @@ class Aarambha_DS_Plugins
      */
     public function runtime($demo)
     {
-        $plugins = $demo['plugins'];
+        $plugins = isset( $demo['plugins'] ) ? $demo['plugins'] : [];
         $this->plugins = $plugins;
 
         $demo_name = $demo['slug'];
+
+        // ── Auto-inject WooCommerce when the demo declares wc_support ──────
+        if ( ! empty( $demo['wc_support'] ) ) {
+            $woo_core = 'woocommerce/woocommerce.php';
+            $listed   = false;
+
+            foreach ( [ 'free', 'pro' ] as $type ) {
+                if ( ! empty( $this->plugins[ $type ] ) ) {
+                    foreach ( $this->plugins[ $type ] as $p ) {
+                        if ( isset( $p['coreFile'] ) && $p['coreFile'] === $woo_core ) {
+                            $listed = true;
+                            break 2;
+                        }
+                    }
+                }
+            }
+
+            if ( ! $listed ) {
+                if ( ! isset( $this->plugins['free'] ) ) {
+                    $this->plugins['free'] = [];
+                }
+                $this->plugins['free'][] = [
+                    'name'     => 'WooCommerce',
+                    'plugin'   => 'woocommerce',
+                    'coreFile' => $woo_core,
+                ];
+            }
+        }
+        // ─────────────────────────────────────────────────────────────────
 
         $transient = get_site_transient('aarambha_ds_plugins');
 
@@ -232,9 +261,9 @@ class Aarambha_DS_Plugins
     }
 
     /**
-     * Prepare the plugins.
+     * Prepare the plugins HTML list.
      * 
-     * return $this
+     * @return array { step: string, html: string }
      */
     public function html()
     {
