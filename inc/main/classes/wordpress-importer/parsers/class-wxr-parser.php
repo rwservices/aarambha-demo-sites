@@ -24,8 +24,8 @@ class WXR_Parser {
 				$parser = new $available_parsers[ $preferred_parser ]();
 				$result = $parser->parse( $file );
 			} else {
-				_doing_it_wrong( __FUNCTION__, sprintf( __( 'Invalid parser specified: %s', 'wordpress-importer' ), $preferred_parser ), '0.9.0' );
-				$result = new WP_Error( 'invalid_parser', sprintf( __( 'Invalid parser specified: %s', 'wordpress-importer' ), $preferred_parser ) );
+				_doing_it_wrong( __FUNCTION__, sprintf( __( 'Invalid parser specified: %s', 'aarambha-demo-sites' ), $preferred_parser ), '0.9.0' );
+				$result = new WP_Error( 'invalid_parser', sprintf( __( 'Invalid parser specified: %s', 'aarambha-demo-sites' ), $preferred_parser ) );
 			}
 
 			// If XMLParser succeeds or this is an invalid WXR file then return the results
@@ -65,8 +65,8 @@ class WXR_Parser {
 				echo $error[0] . ':' . $error[1] . ' ' . esc_html( $error[2] );
 			}
 			echo '</pre>';
-			echo '<p><strong>' . __( 'There was an error when reading this WXR file', 'wordpress-importer' ) . '</strong><br />';
-			echo __( 'Details are shown above. The importer will now try again with a different parser...', 'wordpress-importer' ) . '</p>';
+			echo '<p><strong>' . __( 'There was an error when reading this WXR file', 'aarambha-demo-sites' ) . '</strong><br />';
+			echo __( 'Details are shown above. The importer will now try again with a different parser...', 'aarambha-demo-sites' ) . '</p>';
 		}
 
 		// use regular expressions if nothing else available or this is bad XML
