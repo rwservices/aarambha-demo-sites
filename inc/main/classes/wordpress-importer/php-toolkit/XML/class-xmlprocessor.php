@@ -880,7 +880,7 @@ class XMLProcessor {
 				__METHOD__,
 				sprintf(
 				/* translators: %s: XMLProcessor::create_fragment(). */
-					__( 'Call %s to create an XML Processor instead of calling the constructor directly.' ),
+					__( 'Call %s to create an XML Processor instead of calling the constructor directly.', 'aarambha-demo-sites' ),
 					'<code>XMLProcessor::create_fragment()</code>'
 				),
 				'6.4.0'
@@ -908,7 +908,7 @@ class XMLProcessor {
 		if ( ! $this->expecting_more_input ) {
 			_doing_it_wrong(
 				__METHOD__,
-				__( 'Cannot append bytes after the last input chunk was provided and input_finished() was called.' ),
+				__( 'Cannot append bytes after the last input chunk was provided and input_finished() was called.', 'aarambha-demo-sites' ),
 				'WP_VERSION'
 			);
 
@@ -1460,7 +1460,7 @@ class XMLProcessor {
 		if ( ! array_key_exists( $name, $this->bookmarks ) && count( $this->bookmarks ) >= static::MAX_BOOKMARKS ) {
 			_doing_it_wrong(
 				__METHOD__,
-				__( 'Too many bookmarks: cannot create any more.' ),
+				__( 'Too many bookmarks: cannot create any more.', 'aarambha-demo-sites' ),
 				'WP_VERSION'
 			);
 
@@ -1567,7 +1567,7 @@ class XMLProcessor {
 		if ( ! is_array( $query ) ) {
 			_doing_it_wrong(
 				__METHOD__,
-				__( 'Please pass a query array to this function.' ),
+				__( 'Please pass a query array to this function.', 'aarambha-demo-sites' ),
 				'WP_VERSION'
 			);
 
@@ -1595,7 +1595,7 @@ class XMLProcessor {
 		if ( isset( $query['tag_closers'] ) && 'visit' === $query['tag_closers'] ) {
 			_doing_it_wrong(
 				__METHOD__,
-				__( 'Cannot visit tag closers in XML Processor.' ),
+				__( 'Cannot visit tag closers in XML Processor.', 'aarambha-demo-sites' ),
 				'WP_VERSION'
 			);
 
@@ -1611,7 +1611,7 @@ class XMLProcessor {
 			} else {
 				_doing_it_wrong(
 					__METHOD__,
-					__( 'Breadcrumbs must be an array of strings or two-tuples of (namespace, local name).' ),
+					__( 'Breadcrumbs must be an array of strings or two-tuples of (namespace, local name).', 'aarambha-demo-sites' ),
 					'WP_VERSION'
 				);
 			}
@@ -2667,7 +2667,7 @@ class XMLProcessor {
 		if ( ! array_key_exists( $bookmark_name, $this->bookmarks ) ) {
 			_doing_it_wrong(
 				__METHOD__,
-				__( 'Unknown bookmark name.' ),
+				__( 'Unknown bookmark name.', 'aarambha-demo-sites' ),
 				'WP_VERSION'
 			);
 
@@ -2677,7 +2677,7 @@ class XMLProcessor {
 		if ( ++$this->seek_count > static::MAX_SEEK_OPS ) {
 			_doing_it_wrong(
 				__METHOD__,
-				__( 'Too many calls to seek() - this can lead to performance issues.' ),
+				__( 'Too many calls to seek() - this can lead to performance issues.', 'aarambha-demo-sites' ),
 				'WP_VERSION'
 			);
 
@@ -2854,7 +2854,7 @@ class XMLProcessor {
 			$this->last_error = self::ERROR_SYNTAX;
 			_doing_it_wrong(
 				__METHOD__,
-				__( 'Invalid attribute value encountered.' ),
+				__( 'Invalid attribute value encountered.', 'aarambha-demo-sites' ),
 				'WP_VERSION'
 			);
 
@@ -2893,7 +2893,7 @@ class XMLProcessor {
 			$this->last_error = self::ERROR_SYNTAX;
 			_doing_it_wrong(
 				__METHOD__,
-				__( 'Invalid attribute value encountered.' ),
+				__( 'Invalid attribute value encountered.', 'aarambha-demo-sites' ),
 				'WP_VERSION'
 			);
 
@@ -3360,7 +3360,7 @@ class XMLProcessor {
 			$this->last_error = self::ERROR_SYNTAX;
 			_doing_it_wrong(
 				__METHOD__,
-				__( 'Invalid text content encountered.' ),
+				__( 'Invalid text content encountered.', 'aarambha-demo-sites' ),
 				'WP_VERSION'
 			);
 
@@ -3409,7 +3409,7 @@ class XMLProcessor {
 			default:
 				_doing_it_wrong(
 					__METHOD__,
-					__( 'Cannot set text content on a non-text node.' ),
+					__( 'Cannot set text content on a non-text node.', 'aarambha-demo-sites' ),
 					'WP_VERSION'
 				);
 
@@ -3437,7 +3437,7 @@ class XMLProcessor {
 		if ( ! is_string( $value ) ) {
 			_doing_it_wrong(
 				__METHOD__,
-				__( 'Non-string attribute values cannot be passed to set_attribute().' ),
+				__( 'Non-string attribute values cannot be passed to set_attribute().', 'aarambha-demo-sites' ),
 				'WP_VERSION'
 			);
 
@@ -3445,7 +3445,7 @@ class XMLProcessor {
 		}
 		if ( 'xmlns' === $xml_namespace ) {
 			$this->bail(
-				__( 'Setting attributes in the xmlns namespace is not yet supported by set_attribute().' ),
+				__( 'Setting attributes in the xmlns namespace is not yet supported by set_attribute().', 'aarambha-demo-sites' ),
 				$xml_namespace
 			);
 			return false;
@@ -3464,7 +3464,7 @@ class XMLProcessor {
 			if ( false === $prefix ) {
 				$this->bail(
 					// Translators: 1: The XML namespace.
-					__( 'The namespace "%1$s" is not in the current element\'s scope.' ),
+					__( 'The namespace "%1$s" is not in the current element\'s scope.', 'aarambha-demo-sites' ),
 					$xml_namespace
 				);
 				return false;
@@ -3827,7 +3827,7 @@ class XMLProcessor {
 					if ( ! count( $this->stack_of_open_elements ) ) {
 						$this->bail(
 							// Translators: 1: The closing tag name. 2: The opening tag name.
-							__( 'The closing tag "%1$s" did not match the opening tag "%2$s".' ),
+							__( 'The closing tag "%1$s" did not match the opening tag "%2$s".', 'aarambha-demo-sites' ),
 							$tag_qname,
 							$tag_qname
 						);
@@ -3839,7 +3839,7 @@ class XMLProcessor {
 						$this->bail(
 							sprintf(
 							// translators: %1$s is the name of the closing HTML tag, %2$s is the name of the opening HTML tag.
-								__( 'The closing tag "%1$s" did not match the opening tag "%2$s".' ),
+								__( 'The closing tag "%1$s" did not match the opening tag "%2$s".', 'aarambha-demo-sites' ),
 								$tag_qname,
 								$popped_qname
 							),
@@ -3859,7 +3859,7 @@ class XMLProcessor {
 				$this->bail(
 					sprintf(
 					// translators: %1$s is the unexpected token type.
-						__( 'Unexpected token type "%1$s" in element stage.', 'data-liberation' ),
+						__( 'Unexpected token type "%1$s" in element stage.', 'aarambha-demo-sites' ),
 						$this->get_token_type()
 					),
 					self::ERROR_SYNTAX
