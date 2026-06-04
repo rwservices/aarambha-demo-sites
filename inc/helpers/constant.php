@@ -55,6 +55,12 @@ define('AARAMBHA_DS_VIEWS', AARAMBHA_DS_INC . 'views/');
 
 // Plugin assets urls.
 define('AARAMBHA_DS_ASSETS', $plugin_uri . 'assets/');
-define('AARAMBHA_DS_IMAGES', AARAMBHA_DS_ASSETS . 'images/');
-define('AARAMBHA_DS_CSS', AARAMBHA_DS_ASSETS . 'css/');
-define('AARAMBHA_DS_JS', AARAMBHA_DS_ASSETS . 'js/');
+define('AARAMBHA_DS_IMAGES', AARAMBHA_DS_ASSETS . 'build/images/');
+define('AARAMBHA_DS_CSS', AARAMBHA_DS_ASSETS . 'build/css/');
+define('AARAMBHA_DS_JS', AARAMBHA_DS_ASSETS . 'build/js/');
+define('AARAMBHA_DS_LIBRARIES', AARAMBHA_DS_ASSETS . 'build/library/');
+
+// RTL suffix for assets.
+if ( ! defined( 'AARAMBHA_DS_RTL_SUFFIX' ) ) {
+    define( 'AARAMBHA_DS_RTL_SUFFIX', ( is_rtl() ) ? '-rtl' : '' );
+}

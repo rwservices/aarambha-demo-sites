@@ -162,6 +162,7 @@
 }
 
 @media (max-width: 1100px) {
+
     .aarambha-ds--filter {
         display: block;
     }
@@ -194,7 +195,6 @@
     width: 100px;
     text-align: center;
     font-weight: 500;
-    right: 0;
     transform: rotate(45deg);
     right: -28px;
     top: 12px;
@@ -212,6 +212,7 @@ a.more-details--demo.more-details {
 .theme-browser.rendered .theme.loading .more-details--demo {
     opacity: 1;
 }
+
 .aarambha-ds--main__wrap .theme-browser .theme {
     cursor: pointer;
     float: left;
@@ -224,12 +225,15 @@ a.more-details--demo.more-details {
     box-shadow: 0 1px 1px -1px rgb(0 0 0 / 10%);
     box-sizing: border-box;
 }
+
 .aarambha-ds--main__wrap .theme-browser .themes {
     margin: 0 -15px;
 }
+
 .aarambha-ds--main__wrap .theme-browser .theme:nth-child(3n) {
     margin-right: 15px;
 }
+
 @media (max-width: 1920px) {
 
     .aarambha-ds--demo__browser .theme:nth-child(4n),
@@ -241,13 +245,19 @@ a.more-details--demo.more-details {
 @media (max-width: 1536px) {
 
     /*.aarambha-ds--demo__browser .theme:nth-child(4n),*/
+
     /*.aarambha-ds--demo__browser .theme.demo--visible:nth-child(4n) {*/
+
     /*    margin-right: 3%;*/
+
     /*}*/
 
     /*.aarambha-ds--demo__browser .theme:nth-child(3n),*/
+
     /*.aarambha-ds--demo__browser .theme.demo--visible:nth-child(3n) {*/
+
     /*    margin-right: 0;*/
+
     /*}*/
 }
 
@@ -425,12 +435,12 @@ a.more-details--demo.more-details {
     color: #555;
 }
 
-.aarambha-ds--demo__choose .content-block.chosen input[type=radio]:checked::before {
+.aarambha-ds--demo__choose .content-block.chosen input[type="radio"]:checked::before {
     background-color: #555;
 }
 
-.aarambha-ds--demo__choose .content-block.chosen input[type=radio]:focus,
-.aarambha-ds--demo__choose .content-block.chosen input[type=checkbox]:focus {
+.aarambha-ds--demo__choose .content-block.chosen input[type="radio"]:focus,
+.aarambha-ds--demo__choose .content-block.chosen input[type="checkbox"]:focus {
     border-color: #555;
     box-shadow: 0 0 0 1px #555;
 }
@@ -466,8 +476,8 @@ a.more-details--demo.more-details {
     color: #ddd;
 }
 
-.content-block input[type=checkbox],
-.content-block input[type=radio] {
+.content-block input[type="checkbox"],
+.content-block input[type="radio"] {
     border: 1px solid #ddd;
 }
 
@@ -475,16 +485,16 @@ a.more-details--demo.more-details {
     color: #555;
 }
 
-.content-block.chosen input[type=checkbox],
-.content-block.chosen input[type=radio] {
+.content-block.chosen input[type="checkbox"],
+.content-block.chosen input[type="radio"] {
     border: 1px solid #555;
 }
 
-.input-group label input[type=checkbox] {
+.input-group label input[type="checkbox"] {
     margin: 0 5px 0 0;
 }
 
-.input-group input[type=checkbox]:checked::before {
+.input-group input[type="checkbox"]:checked::before {
     margin: -.1875rem 0 0 -0.28rem;
     height: 1.3125rem;
     width: 1.3125rem;
@@ -516,6 +526,7 @@ a.more-details--demo.more-details {
  * ----------------------------------------------
  */
 @keyframes spin {
+
     0% {
         transform: rotate(0deg);
     }
@@ -526,6 +537,7 @@ a.more-details--demo.more-details {
 }
 
 @keyframes progress {
+
     0% {
         background-position: 1.5rem 0;
     }

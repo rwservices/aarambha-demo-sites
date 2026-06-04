@@ -24,7 +24,7 @@ class Aarambha_DS_Admin
      * 
      * @since 1.0.0
      * @access private
-     * 
+     *
      * @var object
      */
     private static $instance = null;
@@ -34,7 +34,7 @@ class Aarambha_DS_Admin
      * 
      * @since 1.0.0
      * @access protected
-     * 
+     *
      * @var string
      */
     protected $page = '';
@@ -43,10 +43,9 @@ class Aarambha_DS_Admin
      * Creates the Admin page and handles importer UI stuffs.
      *
      * @class Aarambha_DS_Admin
-     * 
      * @version 1.0.0
-     * @since 1.0.0
-     * 
+     * @since   1.0.0
+     *
      * @return object Aarambha_DS_Admin
      */
     public static function getInstance()
@@ -103,20 +102,27 @@ class Aarambha_DS_Admin
         );
     }
 
+    // -------------------------------------------------------------------------
+    // Init
+    // -------------------------------------------------------------------------
+
     /**
-     * Initialize the Aarambha_DS_Admin
+     * Initialize the Aarambha_DS_Admin.
      */
     private function init()
     {
-        add_action('admin_menu', [$this, 'createAdminMenu']);
+        add_action('admin_menu',   [$this, 'createAdminMenu']);
         add_action('admin_footer', [$this, 'renderTemplates']);
-
-        add_action('admin_init', [$this, 'onAdminInit']);
+        add_action('admin_init',   [$this, 'onAdminInit']);
     }
+
+    // -------------------------------------------------------------------------
+    // Admin init
+    // -------------------------------------------------------------------------
 
     /**
      * When admin init runs.
-     * https://yoursite.com/wp-admin/admin.php?page=your-plugin-page&_clear=cache
+     * Clear cache: /wp-admin/admin.php?page=aarambha-ds&_clear=cache
      */
     public function onAdminInit()
     {
@@ -130,25 +136,28 @@ class Aarambha_DS_Admin
     }
 
     /**
-     * Delete the cache.
+     * Delete the transient cache.
      */
     private function deleteCache()
     {
         global $wpdb;
-        $table = $wpdb->options;
-        $query = "SELECT * FROM {$table} WHERE `option_name` LIKE '%_aarambha_ds_%'";
-        $results = $wpdb->get_results($query);
+        $table   = $wpdb->options;
+        $results = $wpdb->get_results(
+            "SELECT * FROM {$table} WHERE `option_name` LIKE '%_aarambha_ds_%'"
+        );
 
-        if (!$results) {
+        if (!$results || !is_array($results)) {
             return;
         }
 
-        if (is_array($results) && count($results) > 0) {
-            foreach ($results as $result) {
-                $wpdb->delete($table, ['option_id' => $result->option_id]);
-            }
+        foreach ($results as $result) {
+            $wpdb->delete($table, ['option_id' => $result->option_id]);
         }
     }
+
+    // -------------------------------------------------------------------------
+    // Admin menu
+    // -------------------------------------------------------------------------
 
     /**
      * Hooked into 'admin_menu' to register the main page.
@@ -158,7 +167,6 @@ class Aarambha_DS_Admin
         $args = Aarambha_DS()->getAdminPageArgs();
 
         if ('submenu' === $args['menu_type']) {
-
             $page = add_submenu_page(
                 $args['parent'],
                 $args['title'],
@@ -168,8 +176,7 @@ class Aarambha_DS_Admin
                 [$this, 'renderAdminPage'],
                 $args['position']
             );
-        } else if ('menu' === $args['menu_type']) {
-
+        } else {
             $page = add_menu_page(
                 $args['title'],
                 $args['menu_name'],
@@ -186,160 +193,236 @@ class Aarambha_DS_Admin
         add_action('admin_enqueue_scripts', [$this, 'enqueueScriptsStyles']);
     }
 
+    // -------------------------------------------------------------------------
+    // Page render
+    // -------------------------------------------------------------------------
 
     /**
      * Render the admin page.
-     * 
+     *
      * @since 1.0.0
-     * @return void.
      */
     public function renderAdminPage()
     {
         $data = [
             'categories' => Aarambha_DS()->api()->categories(),
-            'demos' => Aarambha_DS()->api()->demos()
+            'demos'      => Aarambha_DS()->api()->demos(),
         ];
 
         Aarambha_DS()->view('body', $data);
     }
 
+    // -------------------------------------------------------------------------
+    // Asset helpers
+    // -------------------------------------------------------------------------
+
     /**
-     * Enqueue styles and scripts.
-     * 
-     * @since 1.0.0
-     * @return void
+     * Register a JS script using constants defined in constant.php.
+     *
+     * Looks for an optional `{filename}.asset.php` sidecar file produced by
+     * @wordpress/scripts / webpack.  If the sidecar exists its `dependencies`
+     * and `version` values are used; otherwise the supplied $deps / $ver
+     * (or AARAMBHA_DS_VERSION as a final fallback) are used instead.
+     *
+     * @param string   $handle    Unique script handle.
+     * @param string   $filename  File name relative to AARAMBHA_DS_JS,
+     *                            WITHOUT the .js extension.
+     * @param string[] $deps      Fallback dependencies (used when no asset file).
+     * @param string|null $ver    Fallback version (uses AARAMBHA_DS_VERSION when null).
+     * @param bool     $in_footer Whether to enqueue before </body>.
+     *
+     * @return bool True on success, false when the JS file does not exist.
      */
-    public function enqueueScriptsStyles($hook)
-    {
-        $slug = Aarambha_DS()->getSlug();
+    private function register_script(
+        string $handle,
+        string $filename,
+        array  $deps      = [],
+        ?string $ver      = null,
+        bool   $in_footer = true
+    ): bool {
 
-        if ($this->page === $hook) {
+        // Resolve absolute paths and public URLs from the plugin constants.
+        $js_dir  = wp_normalize_path( AARAMBHA_DS_ROOT . 'assets/build/js/' );
+        $js_url  = AARAMBHA_DS_JS;   // URL constant already ends with /
 
-            // Enqueue styles.
-            wp_enqueue_style(
-                'sweetalert2',
-                AARAMBHA_DS_CSS . 'sweetalert2.css',
-                [],
-                '11.10.1',
-                'all'
-            );
+        $js_file = $js_dir . $filename . '.js';
 
-            wp_enqueue_style(
-                $slug,
-                AARAMBHA_DS_CSS . 'admin.css',
-                [],
-                AARAMBHA_DS_VERSION,
-                'all'
-            );
-
-            // Enqueue scripts.
-            wp_enqueue_script(
-                "sweetalert2",
-                AARAMBHA_DS_JS . 'sweetalert2.js',
-                [],
-                '11.10.1',
-                true
-            );
-
-            wp_register_script(
-                $slug,
-                AARAMBHA_DS_JS . 'admin-ui.js',
-                ['jquery', 'wp-util', 'updates'],
-                AARAMBHA_DS_VERSION,
-                true
-            );
-
-            $theme       =  get_stylesheet();
-            $licenseSlug = "{$theme}-license";
-            $licenseUrl  = admin_url("themes.php?page={$licenseSlug}");
-
-            // Localize strings.
-            $default = [
-                'nonce'          => wp_create_nonce(),
-                'themeName'      => aarambha_ds_get_theme_name(),
-                'offlineTitle'   => esc_html__('You\'re Offline!', 'aarambha-demo-sites'),
-                'purchaseLabel'  => esc_html__('Purchase Now', 'aarambha-demo-sites'),
-                'previewLabel'   => esc_html__('Preview', 'aarambha-demo-sites'),
-                'loadingText'    => esc_html__('Please Wait!', 'aarambha-demo-sites'),
-                'installPlugins' => esc_html__('Install Plugins', 'aarambha-demo-sites'),
-                'importContent'  => esc_html__('Import Content', 'aarambha-demo-sites'),
-                'installing'     => esc_html__('Installing &#8230;', 'aarambha-demo-sites'),
-                'activating'     => esc_html__('Activating &#8230;', 'aarambha-demo-sites'),
-                'active'         => esc_html__('Active', 'aarambha-demo-sites'),
-                'failedTitle'    => esc_html__('Sorry!', 'aarambha-demo-sites'),
-                'activateLink'   => esc_url($licenseUrl),
-                'offlineMsg'     => esc_html__(
-                    'We cannot import now. Please try again later!',
-                    'aarambha-demo-sites'
-                ),
-                'tryAgain'       => esc_html__(
-                    'Refresh the page, and try again!',
-                    'aarambha-demo-sites'
-                ),
-                'content'        => esc_html__(
-                    'Importing Content&#8230;',
-                    'aarambha-demo-sites'
-                ),
-                'customizer'     => esc_html__(
-                    'Importing Customize Information &#8230;',
-                    'aarambha-demo-sites'
-                ),
-                'widgets'        => esc_html__(
-                    'Importing Widgets &#8230;',
-                    'aarambha-demo-sites'
-                ),
-                'slider'         => esc_html__(
-                    'Importing Slider &#8230;',
-                    'aarambha-demo-sites'
-                ),
-                'failed'         => esc_html__(
-                    'Something Went Wrong!',
-                    'aarambha-demo-sites'
-                ),
-                'prepare'        => esc_html__(
-                    'Preparing to import &#8230;',
-                    'aarambha-demo-sites'
-                ),
-                'menu'           => esc_html__(
-                    'Setting Menus &#8230;',
-                    'aarambha-demo-sites'
-                ),
-                'pages'          => esc_html__(
-                    'Setting Pages &#8230;',
-                    'aarambha-demo-sites'
-                ),
-                'finalize'       => esc_html__(
-                    'Finalizing the Import &#8230;',
-                    'aarambha-demo-sites'
-                ),
-            ];
-
-            $user_args = apply_filters('aarambha_ds_localize_data', []);
-            $args      = wp_parse_args($user_args, $default);
-
-            wp_localize_script($slug, 'aarambhaDSData', $args);
-            wp_enqueue_script($slug);
+        // The JS file must exist.
+        if ( ! file_exists( $js_file ) ) {
+            return false;
         }
+
+        // Optional webpack asset sidecar file.
+        $asset_file = $js_dir . $filename . '.asset.php';
+
+        if ( file_exists( $asset_file ) ) {
+            // phpcs:ignore WordPressVIPMinimum.Files.IncludingFile.UsingVariable
+            $asset = require $asset_file;
+            $deps  = ! empty( $deps ) ? $deps : ( $asset['dependencies'] ?? [] );
+            $ver   = $ver ?? ( $asset['version'] ?? AARAMBHA_DS_VERSION );
+        } else {
+            $ver = $ver ?? AARAMBHA_DS_VERSION;
+        }
+
+        return wp_register_script(
+            $handle,
+            $js_url . $filename . '.js',
+            $deps,
+            $ver,
+            $in_footer
+        );
     }
 
     /**
-     * Render popup templates.
-     * 
-     * @since 1.0.0
-     * @return void
+     * Register a CSS stylesheet using constants defined in constant.php.
+     *
+     * @param string   $handle   Unique stylesheet handle.
+     * @param string   $filename File name relative to AARAMBHA_DS_CSS,
+     *                           WITHOUT the .css extension.
+     * @param string[] $deps     Stylesheet dependencies.
+     * @param string|null $ver   Version string; falls back to AARAMBHA_DS_VERSION.
+     * @param string   $media    Media type / query (default 'all').
+     *
+     * @return bool True on success, false when the CSS file does not exist.
      */
-    public function renderTemplates()
+    private function register_style(
+        string $handle,
+        string $filename,
+        array  $deps  = [],
+        ?string $ver  = null,
+        string $media = 'all'
+    ): bool {
+
+        $css_dir  = wp_normalize_path( AARAMBHA_DS_ROOT . 'assets/build/css/' );
+        $css_url  = AARAMBHA_DS_CSS;  // URL constant already ends with /
+
+        $css_file = $css_dir . $filename . '.css';
+
+        if ( ! file_exists( $css_file ) ) {
+            return false;
+        }
+
+        $ver = $ver ?? AARAMBHA_DS_VERSION;
+
+        return wp_register_style(
+            $handle,
+            $css_url . $filename . '.css',
+            $deps,
+            $ver,
+            $media
+        );
+    }
+
+    // -------------------------------------------------------------------------
+    // Enqueue assets
+    // -------------------------------------------------------------------------
+
+    /**
+     * Enqueue styles and scripts on our admin page only.
+     *
+     * @since 1.0.0
+     *
+     * @param string $hook Current admin page hook suffix.
+     */
+    public function enqueueScriptsStyles( string $hook ): void
+    {
+        if ( $this->page !== $hook ) {
+            return;
+        }
+
+        $slug = Aarambha_DS()->getSlug();
+
+        // -- Styles ----------------------------------------------------------
+
+        // Third-party: SweetAlert2 (lives in library/, registered manually).
+        wp_enqueue_style(
+            'sweetalert2',
+            AARAMBHA_DS_LIBRARIES . 'sweetalert2.css',
+            [],
+            '11.10.1',
+            'all'
+        );
+
+        // Plugin admin stylesheet (RTL-aware via AARAMBHA_DS_RTL_SUFFIX).
+        $admin_css = 'admin' . AARAMBHA_DS_RTL_SUFFIX;
+        if ( $this->register_style( $slug, $admin_css ) ) {
+            wp_enqueue_style( $slug );
+        }
+
+        // -- Scripts ---------------------------------------------------------
+
+        // Third-party: SweetAlert2.
+        wp_enqueue_script(
+            'sweetalert2',
+            AARAMBHA_DS_LIBRARIES . 'sweetalert2.js',
+            [],
+            '11.10.1',
+            true
+        );
+
+        // Plugin admin script.
+        if ( $this->register_script( $slug, 'admin', ['jquery', 'wp-util', 'updates'] ) ) {
+
+            $theme      = get_stylesheet();
+            $licenseUrl = admin_url( "themes.php?page={$theme}-license" );
+
+            $default = [
+                'nonce'          => wp_create_nonce(),
+                'themeName'      => aarambha_ds_get_theme_name(),
+                'offlineTitle'   => esc_html__( "You're Offline!", 'aarambha-demo-sites' ),
+                'purchaseLabel'  => esc_html__( 'Purchase Now', 'aarambha-demo-sites' ),
+                'previewLabel'   => esc_html__( 'Preview', 'aarambha-demo-sites' ),
+                'loadingText'    => esc_html__( 'Please Wait!', 'aarambha-demo-sites' ),
+                'installPlugins' => esc_html__( 'Install Plugins', 'aarambha-demo-sites' ),
+                'importContent'  => esc_html__( 'Import Content', 'aarambha-demo-sites' ),
+                'installing'     => esc_html__( 'Installing &#8230;', 'aarambha-demo-sites' ),
+                'activating'     => esc_html__( 'Activating &#8230;', 'aarambha-demo-sites' ),
+                'active'         => esc_html__( 'Active', 'aarambha-demo-sites' ),
+                'failedTitle'    => esc_html__( 'Sorry!', 'aarambha-demo-sites' ),
+                'activateLink'   => esc_url( $licenseUrl ),
+                'offlineMsg'     => esc_html__( 'We cannot import now. Please try again later!', 'aarambha-demo-sites' ),
+                'tryAgain'       => esc_html__( 'Refresh the page, and try again!', 'aarambha-demo-sites' ),
+                'content'        => esc_html__( 'Importing Content&#8230;', 'aarambha-demo-sites' ),
+                'customizer'     => esc_html__( 'Importing Customize Information &#8230;', 'aarambha-demo-sites' ),
+                'widgets'        => esc_html__( 'Importing Widgets &#8230;', 'aarambha-demo-sites' ),
+                'slider'         => esc_html__( 'Importing Slider &#8230;', 'aarambha-demo-sites' ),
+                'failed'         => esc_html__( 'Something Went Wrong!', 'aarambha-demo-sites' ),
+                'prepare'        => esc_html__( 'Preparing to import &#8230;', 'aarambha-demo-sites' ),
+                'menu'           => esc_html__( 'Setting Menus &#8230;', 'aarambha-demo-sites' ),
+                'pages'          => esc_html__( 'Setting Pages &#8230;', 'aarambha-demo-sites' ),
+                'finalize'       => esc_html__( 'Finalizing the Import &#8230;', 'aarambha-demo-sites' ),
+            ];
+
+            $args = wp_parse_args( apply_filters( 'aarambha_ds_localize_data', [] ), $default );
+
+            wp_localize_script( $slug, 'aarambhaDSData', $args );
+            wp_enqueue_script( $slug );
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Templates
+    // -------------------------------------------------------------------------
+
+    /**
+     * Render Underscore/wp.template popup templates in the admin footer.
+     *
+     * @since 1.0.0
+     */
+    public function renderTemplates(): void
     {
         $currentScreen = get_current_screen();
 
-        if ($this->page === $currentScreen->id) {
-            Aarambha_DS()->view('popups/activate-theme');
-            Aarambha_DS()->view('popups/failed');
-            Aarambha_DS()->view('popups/purchase-theme');
-            Aarambha_DS()->view('popups/information');
-            Aarambha_DS()->view('import');
-            Aarambha_DS()->view('importing');
-            Aarambha_DS()->view('complete');
+        if ( ! $currentScreen || $this->page !== $currentScreen->id ) {
+            return;
         }
+
+        Aarambha_DS()->view('popups/activate-theme');
+        Aarambha_DS()->view('popups/failed');
+        Aarambha_DS()->view('popups/purchase-theme');
+        Aarambha_DS()->view('popups/information');
+        Aarambha_DS()->view('import');
+        Aarambha_DS()->view('importing');
+        Aarambha_DS()->view('complete');
     }
 }
