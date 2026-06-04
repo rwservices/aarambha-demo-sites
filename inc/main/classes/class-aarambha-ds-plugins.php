@@ -2,468 +2,480 @@
 
 /**
  * Prepares the plugin data.
- * 
+ *
  * @since       1.0.0
  * @package     Aarambha_Demo_Sites
  * @subpackage  Aarambha_Demo_Sites/Inc/Core/UI
  */
 
-if (!defined('WPINC')) {
-    exit;    // Exit if accessed directly.
+if ( ! defined( 'WPINC' ) ) {
+    exit;
 }
 
-
 /**
- * Class:: Aarambha_DS_Plugins
- * 
- * Plugin installer.
+ * Class Aarambha_DS_Plugins
+ *
+ * Plugin installer / activator used by the demo importer.
  */
+class Aarambha_DS_Plugins {
 
-class Aarambha_DS_Plugins
-{
-    /**
-     * Single class instance.
-     * 
-     * @since 1.0.0
-     * @access private
-     * 
-     * @var object
-     */
+    // -------------------------------------------------------------------------
+    // Singleton
+    // -------------------------------------------------------------------------
+
+    /** @var self|null */
     private static $instance = null;
 
     /**
-     * Free & Pro Plugins.
-     * 
-     * @since 1.0.0
-     * @access private
-     * 
+     * Merged free + pro plugin list for the current demo.
+     *
+     * Each entry MUST contain at minimum:
+     *   'name'     => string  Human-readable label.
+     *   'plugin'   => string  WordPress.org / download slug  (e.g. 'woocommerce').
+     *   'coreFile' => string  Plugin main file relative to WP_PLUGIN_DIR
+     *                         (e.g. 'woocommerce/woocommerce.php').
+     *
      * @var array
      */
     private $plugins = [];
 
-    /**
-     * Ensures only one instance of this class is available.
-     * 
-     * 
-     * @version 1.0.0
-     * @since 1.0.0
-     * 
-     * @return object Aarambha_DS_Ajax
-     */
-    public static function getInstance()
-    {
-        if (null === self::$instance) {
+    public static function getInstance(): self {
+        if ( null === self::$instance ) {
             self::$instance = new self();
             self::$instance->actions();
         }
-
         return self::$instance;
     }
 
-    /**
-     * A dummy constructor to prevent this class from being loaded more than once.
-     *
-     * @see Aarambha_DS_Ajax::getInstance()
-     *
-     * @since 1.0.0
-     * @access private
-     * @codeCoverageIgnore
-     */
-    private function __construct()
-    {
-        /* We do nothing here! */
+    private function __construct() {}
+
+    public function __clone() {
+        _doing_it_wrong( __FUNCTION__, esc_html__( 'Cheatin&#8217; huh?', 'aarambha-demo-sites' ), '1.0.0' );
     }
 
+    public function __wakeup() {
+        _doing_it_wrong( __FUNCTION__, esc_html__( 'Cheatin&#8217; huh?', 'aarambha-demo-sites' ), '1.0.0' );
+    }
+
+    // -------------------------------------------------------------------------
+    // Hooks
+    // -------------------------------------------------------------------------
+
+    public function actions(): void {
+        add_filter( 'plugins_api', [ $this, 'pluginsApi' ], 10, 3 );
+    }
+
+    // -------------------------------------------------------------------------
+    // Runtime — build plugin list for the chosen demo
+    // -------------------------------------------------------------------------
+
     /**
-     * You cannot clone this class.
+     * Build the plugin list for $demo, auto-injecting WooCommerce when
+     * the demo declares wc_support = true and WooCommerce is not already listed.
      *
-     * @since 1.0.0
-     * @codeCoverageIgnore
+     * @param array $demo Full demo data array from the API / transient.
+     * @return $this
      */
-    public function __clone()
-    {
-        _doing_it_wrong(
-            __FUNCTION__,
-            esc_html__('Cheatin&#8217; huh?', 'aarambha-demo-sites'),
-            '1.0.0'
-        );
-    }
+    public function runtime( array $demo ): self {
 
-    /**
-     * You cannot unserialize instances of this class.
-     *
-     * @since 1.0.0
-     * @codeCoverageIgnore
-     */
-    public function __wakeup()
-    {
-        _doing_it_wrong(
-            __FUNCTION__,
-            esc_html__('Cheatin&#8217; huh?', 'aarambha-demo-sites'),
-            '1.0.0'
-        );
-    }
+        $this->plugins = isset( $demo['plugins'] ) ? (array) $demo['plugins'] : [];
+        $demo_name     = $demo['slug'] ?? '';
 
-    /**
-     * 
-     */
-    public function actions()
-    {
-        // Hook into plugins api
-        add_filter('plugins_api', [$this, 'pluginsApi'], 10, 3);
-    }
-
-    /**
-     * Sets the plugins, auto-injecting WooCommerce when the demo requires it.
-     * 
-     * @param array $demo Demo retrieved from the API.
-     * 
-     * @return Aarambha_DS_Plugins
-     */
-    public function runtime($demo)
-    {
-        $plugins = isset( $demo['plugins'] ) ? $demo['plugins'] : [];
-        $this->plugins = $plugins;
-
-        $demo_name = $demo['slug'];
-
-        // ── Auto-inject WooCommerce when the demo declares wc_support ──────
+        // ── Auto-inject WooCommerce ──────────────────────────────────────────
         if ( ! empty( $demo['wc_support'] ) ) {
             $woo_core = 'woocommerce/woocommerce.php';
             $listed   = false;
 
             foreach ( [ 'free', 'pro' ] as $type ) {
-                if ( ! empty( $this->plugins[ $type ] ) ) {
-                    foreach ( $this->plugins[ $type ] as $p ) {
-                        if ( isset( $p['coreFile'] ) && $p['coreFile'] === $woo_core ) {
-                            $listed = true;
-                            break 2;
-                        }
+                foreach ( $this->plugins[ $type ] ?? [] as $p ) {
+                    if ( ( $p['coreFile'] ?? '' ) === $woo_core ) {
+                        $listed = true;
+                        break 2;
                     }
                 }
             }
 
             if ( ! $listed ) {
-                if ( ! isset( $this->plugins['free'] ) ) {
-                    $this->plugins['free'] = [];
-                }
                 $this->plugins['free'][] = [
                     'name'     => 'WooCommerce',
-                    'plugin'   => 'woocommerce',
+                    'plugin'   => 'woocommerce',   // wp.org slug used by ajaxInstall()
                     'coreFile' => $woo_core,
                 ];
             }
         }
-        // ─────────────────────────────────────────────────────────────────
+        // ────────────────────────────────────────────────────────────────────
 
-        $transient = get_site_transient('aarambha_ds_plugins');
+        // ── Pro-plugin transient (used by pluginsApi() / download links) ────
+        $transient          = get_site_transient( 'aarambha_ds_plugins' ) ?: new stdClass();
+        $transient->plugins = $transient->plugins ?? [];
 
-        if (!$transient) {
-            $transient = new stdClass();
-            $transient->plugins = [];
-        }
-
-        if (isset($plugins['pro'])) {
-
-            $proPlugins = $plugins['pro'];
-
+        if ( ! empty( $this->plugins['pro'] ) ) {
             $pluginsArr = [];
 
-            foreach ($proPlugins as $plugin) {
-                $pluginCoreFile = $plugin['coreFile'];
+            foreach ( $this->plugins['pro'] as $plugin ) {
+                $pluginCoreFile = $plugin['coreFile'] ?? '';
+                $slug           = $plugin['plugin']   ?? '';
+                $file           = $plugin['plugin_file'] ?? '';
 
-                $slug = $plugin['plugin'];
-                $file = $plugin['plugin_file'];
-
-                if (!in_array($pluginCoreFile, $plugins)) {
-
-                    $pluginObj = new stdClass();
-                    $pluginObj->name = $plugin['name'];
-                    $pluginObj->version = $plugin['version'];
-                    $pluginObj->slug = $slug;
-                    $pluginObj->plugin = $pluginCoreFile;
-                    $pluginObj->fileName = $file;
-                    $pluginObj->demo = $demo_name;
-                    $pluginObj->url = $demo['preview'];
-                    $pluginObj->download_link = Aarambha_DS()->api()->deferredDownload(
-                        compact('slug', 'demo_name')
-                    );
-
-                    array_push($pluginsArr, $pluginObj);
+                // Skip if already present in the raw plugins array (sanity guard).
+                if ( in_array( $pluginCoreFile, (array) $this->plugins, true ) ) {
+                    continue;
                 }
+
+                $pluginObj               = new stdClass();
+                $pluginObj->name         = $plugin['name']    ?? '';
+                $pluginObj->version      = $plugin['version'] ?? '';
+                $pluginObj->slug         = $slug;
+                $pluginObj->plugin       = $pluginCoreFile;
+                $pluginObj->fileName     = $file;
+                $pluginObj->demo         = $demo_name;
+                $pluginObj->url          = $demo['preview'] ?? '';
+                $pluginObj->download_link = Aarambha_DS()->api()->deferredDownload(
+                    compact( 'slug', 'demo_name' )
+                );
+
+                $pluginsArr[] = $pluginObj;
             }
 
             $transient->plugins = $pluginsArr;
         }
 
-        set_site_transient('aarambha_ds_plugins', $transient, WEEK_IN_SECONDS);
+        set_site_transient( 'aarambha_ds_plugins', $transient, WEEK_IN_SECONDS );
 
         return $this;
     }
 
+    // -------------------------------------------------------------------------
+    // Status helpers
+    // -------------------------------------------------------------------------
+
     /**
-     * Useful for injection.
+     * Build the HTML plugin list and decide whether to go straight to import.
+     *
+     * @return array{ step: string, html: string }
      */
-    public function inject()
-    {
-        if (!function_exists('is_plugin_active')) {
+    public function html(): array {
+        $free    = $this->plugins['free'] ?? [];
+        $pro     = $this->plugins['pro']  ?? [];
+        $plugins = array_merge( $free, $pro );
+        $total   = count( $plugins );
+
+        $activeLists = [];
+        foreach ( $plugins as $plugin ) {
+            if ( $this->isActive( $plugin['coreFile'] ?? '' ) ) {
+                $activeLists[] = $plugin['coreFile'];
+            }
+        }
+
+        $allActive = ( count( $activeLists ) === $total );
+
+        $status         = [];
+        $status['step'] = $allActive ? 'import' : 'install-plugin';
+
+        ob_start();
+        if ( ! $allActive ) {
+            Aarambha_DS()->view( 'plugins-list', $this->plugins );
+        }
+        $status['html'] = ob_get_clean();
+
+        return $status;
+    }
+
+    // -------------------------------------------------------------------------
+    // Install / activate
+    // -------------------------------------------------------------------------
+
+    /** Load is_plugin_active() if needed. */
+    public function inject(): void {
+        if ( ! function_exists( 'is_plugin_active' ) ) {
             require_once ABSPATH . 'wp-admin/includes/plugin.php';
         }
     }
 
-
-    /**
-     * Inject the installer.
-     */
-    public function injectInstaller()
-    {
-        if (!class_exists('WP_Upgrader', false)) {
+    /** Load WP_Upgrader + plugins_api() if needed. */
+    public function injectInstaller(): void {
+        if ( ! class_exists( 'WP_Upgrader', false ) ) {
             include_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
         }
-
-        if (!function_exists('plugins_api')) {
+        if ( ! function_exists( 'plugins_api' ) ) {
             include_once ABSPATH . 'wp-admin/includes/plugin-install.php';
         }
     }
 
     /**
-     * Check if plugin is installed.
-     * 
-     * @param string $pluginFile
-     * 
-     * @return bool.
+     * Check whether a plugin's main file exists on disk.
+     *
+     * @param string $pluginFile e.g. 'woocommerce/woocommerce.php'
      */
-    public function isInstalled($pluginFile = '')
-    {
-        if ('' === $pluginFile) {
+    public function isInstalled( string $pluginFile = '' ): bool {
+        if ( '' === $pluginFile ) {
             return false;
         }
-
-        return file_exists(WP_PLUGIN_DIR . "/{$pluginFile}");
+        return file_exists( WP_PLUGIN_DIR . "/{$pluginFile}" );
     }
 
     /**
-     * Is plugin active check.
-     * 
-     * @param string $pluginFile
-     * 
-     * @return bool.
+     * Check whether a plugin is currently active.
+     *
+     * @param string $pluginFile e.g. 'woocommerce/woocommerce.php'
      */
-    public function isActive($pluginFile)
-    {
-        if (empty($pluginFile)) {
+    public function isActive( string $pluginFile ): bool {
+        if ( empty( $pluginFile ) ) {
             return false;
         }
-
         $this->inject();
-
-        return is_plugin_active($pluginFile);
+        return is_plugin_active( $pluginFile );
     }
 
     /**
-     * Prepare the plugins HTML list.
-     * 
-     * @return array { step: string, html: string }
-     */
-    public function html()
-    {
-        $free = (isset($this->plugins['free'])) ? $this->plugins['free'] : [];
-        $pro  = (isset($this->plugins['pro'])) ? $this->plugins['pro'] : [];
-
-        $plugins = array_merge($free, $pro);
-        $total = count($plugins);
-
-        $activeLists = [];
-
-        foreach ($plugins as $plugin) {
-
-            if ($this->isActive($plugin['coreFile'])) {
-                array_push($activeLists, $plugin['coreFile']);
-            }
-        }
-
-        if (count($activeLists) === $total) {
-            $status['step'] = 'import';
-        } else {
-            $status['step'] = 'install-plugin';
-        }
-
-        ob_start();
-
-        if (count($activeLists) !== $total) {
-            Aarambha_DS()->view('plugins-list', $this->plugins);
-        }
-
-        $content = ob_get_clean();
-        $status['html'] = $content;
-
-        return $status;
-    }
-
-    /**
-     * Prepare the pro plugins.
-     */
-    public function prepare($plugin)
-    {
-    }
-
-    /**
-     * Install the plugin.
-     * 
-     * @param string $plugin 'plugin slug'
-     * 
+     * Activate a plugin by its main file path.
+     *
+     * @param string $plugin e.g. 'woocommerce/woocommerce.php'
      * @return bool
      */
-    public function install($plugin)
-    {
-    }
-
-    /**
-     * Activate the plugin.
-     * 
-     * @param string $plugin 'Plugin File'
-     * 
-     * @return bool
-     */
-    public function activate($plugin)
-    {
+    public function activate( string $plugin ): bool {
         $this->inject();
 
-        if (!$this->isInstalled($plugin)) {
+        if ( ! $this->isInstalled( $plugin ) ) {
             return false;
         }
 
-        $status = activate_plugin($plugin);
+        $result = activate_plugin( $plugin );
 
-        if (!is_wp_error($status) || null !== $status) {
-            return true;
-        }
-
-        return false;
+        // activate_plugin() returns null on success, WP_Error on failure.
+        return ( null === $result || ! is_wp_error( $result ) );
     }
 
-
     /**
-     * Install Plugin with AJAX
-     * 
-     * @see wp_ajax_install_plugin() from 'wp-admin/includes/ajax-actions.php'
-     * 
-     * Modified it to match our need.
-     * 
-     * @return array
+     * Install a free plugin from WordPress.org via AJAX.
+     *
+     * Mirrors wp_ajax_install_plugin() but returns an array instead of
+     * echoing JSON so the AJAX handler stays in control of the response.
+     *
+     * @param string $slug WordPress.org plugin slug (e.g. 'woocommerce').
+     * @return array{ success: bool, pluginName?: string, errorCode?: string, errorMessage?: string }
      */
-    public function ajaxInstall($slug)
-    {
+    public function ajaxInstall( string $slug ): array {
 
         $status = [];
 
-        if (empty($slug)) {
-            $status['success'] = false;
+        if ( empty( $slug ) ) {
+            $status['success']      = false;
+            $status['errorMessage'] = __( 'No plugin slug supplied.', 'aarambha-demo-sites' );
             return $status;
         }
 
         $this->injectInstaller();
 
+        // Query WordPress.org plugin repo for download info.
         $api = plugins_api(
             'plugin_information',
-            array(
-                'slug'   => sanitize_key(wp_unslash($slug)),
-                'fields' => array(
-                    'sections' => false,
-                ),
-            )
+            [
+                'slug'   => sanitize_key( wp_unslash( $slug ) ),
+                'fields' => [ 'sections' => false ],
+            ]
         );
 
-        if (is_wp_error($api)) {
-
-            $status['success'] = false;
+        if ( is_wp_error( $api ) ) {
+            $status['success']      = false;
             $status['errorMessage'] = $api->get_error_message();
-
-            return  $status;
+            return $status;
         }
 
         $status['pluginName'] = $api->name;
 
         $skin     = new WP_Ajax_Upgrader_Skin();
-        $upgrader = new Plugin_Upgrader($skin);
+        $upgrader = new Plugin_Upgrader( $skin );
+        $result   = $upgrader->install( $api->download_link );
 
-        $result   = $upgrader->install($api->download_link);
-
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            $status['success'] = false;
-
-            $status['debug'] = $skin->get_upgrade_messages();
-        }
-
-        if (is_wp_error($result)) {
-            $status['success'] = false;
-
-
+        // ── Error classification ─────────────────────────────────────────────
+        if ( is_wp_error( $result ) ) {
+            $status['success']      = false;
             $status['errorCode']    = $result->get_error_code();
             $status['errorMessage'] = $result->get_error_message();
-
             return $status;
-        } elseif (is_wp_error($skin->result)) {
-            $status['success'] = false;
+        }
 
-
+        if ( is_wp_error( $skin->result ) ) {
+            $status['success']      = false;
             $status['errorCode']    = $skin->result->get_error_code();
             $status['errorMessage'] = $skin->result->get_error_message();
             return $status;
-        } elseif ($skin->get_errors()->has_errors()) {
-            $status['success'] = false;
+        }
 
+        if ( $skin->get_errors()->has_errors() ) {
+            $status['success']      = false;
             $status['errorMessage'] = $skin->get_error_messages();
-            return $status;
-        } elseif (is_null($result)) {
-            global $wp_filesystem;
-
-            $status['success'] = false;
-
-            $status['errorCode']    = 'unable_to_connect_to_filesystem';
-            $status['errorMessage'] = __('Unable to connect to the filesystem. Please confirm your credentials.', 'aarambha-demo-sites');
-
-            // Pass through the error from WP_Filesystem if one was raised.
-            if ($wp_filesystem instanceof WP_Filesystem_Base && is_wp_error($wp_filesystem->errors) && $wp_filesystem->errors->has_errors()) {
-                $status['errorMessage'] = esc_html($wp_filesystem->errors->get_error_message());
-            }
-
             return $status;
         }
 
-        $status['success'] = true;
+        if ( is_null( $result ) ) {
+            global $wp_filesystem;
+            $status['success']   = false;
+            $status['errorCode'] = 'unable_to_connect_to_filesystem';
+            $status['errorMessage'] = __( 'Unable to connect to the filesystem. Please confirm your credentials.', 'aarambha-demo-sites' );
 
+            if (
+                $wp_filesystem instanceof WP_Filesystem_Base &&
+                is_wp_error( $wp_filesystem->errors ) &&
+                $wp_filesystem->errors->has_errors()
+            ) {
+                $status['errorMessage'] = esc_html( $wp_filesystem->errors->get_error_message() );
+            }
+            return $status;
+        }
+        // ────────────────────────────────────────────────────────────────────
+
+        $status['success'] = true;
         return $status;
     }
 
+    // -------------------------------------------------------------------------
+    // WooCommerce post-import setup
+    // -------------------------------------------------------------------------
+
     /**
-     * Modify the API response to include our plugin installer.
+     * After demo content is imported: deduplicate WC pages, wire up WC options,
+     * and clear the WC activation-redirect transient.
+     *
+     * Inspired by ThemeGrill's ImportHooks::set_wc_pages().
+     *
+     * @param string $demo_slug The imported demo slug (used for the filter name).
      */
-    public function pluginsApi($response, $action, $args)
-    {
-        $proPlugins = get_site_transient('aarambha_ds_plugins');
+    public function setupWooCommercePages( string $demo_slug = '' ): void {
+
+        if ( ! class_exists( 'WooCommerce' ) ) {
+            return;
+        }
+
+        global $wpdb;
+
+        /**
+         * Filterable WC page definitions.
+         * Each key is the WC option suffix (woocommerce_{key}_page_id).
+         * 'name'  = post_name (slug), 'title' = post_title.
+         */
+        $wc_pages = apply_filters(
+            "aarambha_ds_wc_{$demo_slug}_pages",
+            [
+                'shop'      => [ 'name' => 'shop',       'title' => 'Shop'       ],
+                'cart'      => [ 'name' => 'cart',       'title' => 'Cart'       ],
+                'checkout'  => [ 'name' => 'checkout',   'title' => 'Checkout'   ],
+                'myaccount' => [ 'name' => 'my-account', 'title' => 'My Account' ],
+            ]
+        );
+
+        foreach ( $wc_pages as $option_key => $page ) {
+
+            // Find every published page matching the slug OR the title.
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+            $page_ids = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT ID FROM {$wpdb->posts}
+                     WHERE ( post_name = %s OR post_title = %s )
+                       AND post_type   = 'page'
+                       AND post_status = 'publish'",
+                    $page['name'],
+                    $page['title']
+                )
+            );
+
+            if ( empty( $page_ids ) ) {
+                continue;
+            }
+
+            $keep_id    = 0;
+            $delete_ids = [];
+
+            // Keep the page with the highest ID (most recently imported).
+            if ( count( $page_ids ) > 1 ) {
+                foreach ( $page_ids as $row ) {
+                    if ( (int) $row->ID > $keep_id ) {
+                        if ( $keep_id ) {
+                            $delete_ids[] = $keep_id;
+                        }
+                        $keep_id = (int) $row->ID;
+                    } else {
+                        $delete_ids[] = (int) $row->ID;
+                    }
+                }
+            } else {
+                $keep_id = (int) $page_ids[0]->ID;
+            }
+
+            // Permanently delete duplicate pages.
+            foreach ( $delete_ids as $del_id ) {
+                wp_delete_post( $del_id, true );
+            }
+
+            // Normalise the slug and save the WC option.
+            if ( $keep_id > 0 ) {
+                wp_update_post( [
+                    'ID'        => $keep_id,
+                    'post_name' => sanitize_title( $page['name'] ),
+                ] );
+                update_option( "woocommerce_{$option_key}_page_id", $keep_id );
+            }
+        }
+
+        // Prevent WC from redirecting to its setup wizard after the import.
+        delete_transient( '_wc_activation_redirect' );
+    }
+
+    // -------------------------------------------------------------------------
+    // pluginsApi filter — rewire pro-plugin download links
+    // -------------------------------------------------------------------------
+
+    /**
+     * Intercept plugins_api() calls for pro plugins so WP_Upgrader gets
+     * our download link instead of looking them up on wp.org.
+     *
+     * @param false|object|WP_Error $response
+     * @param string                $action
+     * @param object                $args
+     * @return false|object|WP_Error
+     */
+    public function pluginsApi( $response, string $action, object $args ) {
+
+        if ( 'plugin_information' !== $action || ! isset( $args->slug ) ) {
+            return $response;
+        }
+
+        $proPlugins = get_site_transient( 'aarambha_ds_plugins' );
+
+        if ( empty( $proPlugins->plugins ) || ! is_array( $proPlugins->plugins ) ) {
+            return $response;
+        }
+
         $theme = aarambha_ds_get_theme();
 
-        if ('plugin_information' === $action && isset($args->slug)) {
-            $slug = $args->slug;
-
-            foreach ($proPlugins->plugins as $plugin) {
-                $demo = $plugin->demo;
-
-                if ($plugin->slug === $args->slug) {
-                    $response                 = new stdClass();
-                    $response->id             = str_replace('-', '_', $plugin->slug);
-                    $response->slug           = $plugin->slug;
-                    $response->plugin_name    = $plugin->name;
-                    $response->name           = $plugin->name;
-                    $response->new_version    = $plugin->version;
-                    $response->download_link  = Aarambha_DS()->api()->download(
-                        compact('theme', 'slug', 'demo')
-                    );
-                }
+        foreach ( $proPlugins->plugins as $plugin ) {
+            if ( $plugin->slug !== $args->slug ) {
+                continue;
             }
+
+            $slug = $plugin->slug;
+            $demo = $plugin->demo;
+
+            $response                = new stdClass();
+            $response->id            = str_replace( '-', '_', $slug );
+            $response->slug          = $slug;
+            $response->plugin_name   = $plugin->name;
+            $response->name          = $plugin->name;
+            $response->new_version   = $plugin->version;
+            $response->download_link = Aarambha_DS()->api()->download(
+                compact( 'theme', 'slug', 'demo' )
+            );
+            break;
         }
 
         return $response;
     }
+
+    // -------------------------------------------------------------------------
+    // Stubs kept for backwards compatibility
+    // -------------------------------------------------------------------------
+
+    public function prepare( $plugin ): void {}
+    public function install( $plugin ): void {}
 }

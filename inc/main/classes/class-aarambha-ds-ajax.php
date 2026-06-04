@@ -2,114 +2,61 @@
 
 /**
  * Handle the AJAX sent through demo importer.
- * 
+ *
  * @since       1.0.0
  * @package     Aarambha_Demo_Sites
  * @subpackage  Aarambha_Demo_Sites/Inc/Core/UI
  */
 
-if (!defined('WPINC')) {
-    exit;    // Exit if accessed directly.
+if ( ! defined( 'WPINC' ) ) {
+    exit;
 }
 
 /**
  * Class Aarambha_DS_Ajax
- * 
- * Handles the AJAX Actions.
+ *
+ * Handles all AJAX actions for the demo importer.
  */
+class Aarambha_DS_Ajax {
 
-class Aarambha_DS_Ajax
-{
-    /**
-     * Single class instance.
-     * 
-     * @since 1.0.0
-     * @access private
-     * 
-     * @var object
-     */
+    // -------------------------------------------------------------------------
+    // Singleton
+    // -------------------------------------------------------------------------
+
+    /** @var self|null */
     private static $instance = null;
 
     /**
-     * AJAX Actions.
-     * 
-     * @since 1.0.0
-     * @access private
-     * 
-     * @var array
+     * Map of AJAX action slugs => method names.
+     *
+     * @var array<string, string>
      */
     private $actions = [];
 
-    /**
-     * Registers and fires the AJAX actions.
-     *
-     * @class Aarambha_DS_Ajax
-     * 
-     * @version 1.0.0
-     * @since 1.0.0
-     * 
-     * @return object Aarambha_DS_Ajax
-     */
-    public static function getInstance()
-    {
-        if (null === self::$instance) {
+    public static function getInstance(): self {
+        if ( null === self::$instance ) {
             self::$instance = new self();
             self::$instance->define();
             self::$instance->register();
         }
-
         return self::$instance;
     }
 
-    /**
-     * A dummy constructor to prevent this class from being loaded more than once.
-     *
-     * @see Aarambha_DS_Ajax::getInstance()
-     *
-     * @since 1.0.0
-     * @access private
-     * @codeCoverageIgnore
-     */
-    private function __construct()
-    {
-        /* We do nothing here! */
+    private function __construct() {}
+
+    public function __clone() {
+        _doing_it_wrong( __FUNCTION__, esc_html__( 'Cheatin&#8217; huh?', 'aarambha-demo-sites' ), '1.0.0' );
     }
 
-    /**
-     * You cannot clone this class.
-     *
-     * @since 1.0.0
-     * @codeCoverageIgnore
-     */
-    public function __clone()
-    {
-        _doing_it_wrong(
-            __FUNCTION__,
-            esc_html__('Cheatin&#8217; huh?', 'aarambha-demo-sites'),
-            '1.0.0'
-        );
+    public function __wakeup() {
+        _doing_it_wrong( __FUNCTION__, esc_html__( 'Cheatin&#8217; huh?', 'aarambha-demo-sites' ), '1.0.0' );
     }
 
-    /**
-     * You cannot unserialize instances of this class.
-     *
-     * @since 1.0.0
-     * @codeCoverageIgnore
-     */
-    public function __wakeup()
-    {
-        _doing_it_wrong(
-            __FUNCTION__,
-            esc_html__('Cheatin&#8217; huh?', 'aarambha-demo-sites'),
-            '1.0.0'
-        );
-    }
+    // -------------------------------------------------------------------------
+    // Registration
+    // -------------------------------------------------------------------------
 
-    /**
-     * Defines all the AJAX actions.
-     */
-    private function define()
-    {
+    private function define(): void {
         $this->actions = [
             'retrieve-demo'        => 'retrieveDemo',
             'list-plugins'         => 'listPlugins',
@@ -122,645 +69,449 @@ class Aarambha_DS_Ajax
             'slider-import'        => 'importSlider',
             'menu-import'          => 'importMenu',
             'pages-import'         => 'importPages',
-            'finalize-import'      => 'finalize'
+            'finalize-import'      => 'finalize',
         ];
     }
 
-    /**
-     * Registers all the AJAX actions.
-     */
-    private function register()
-    {
-        foreach ($this->actions as $key => $value) {
-            $ajaxAction = "wp_ajax_{$key}";
-
-            add_action($ajaxAction, [$this, $value]);
+    private function register(): void {
+        foreach ( $this->actions as $key => $method ) {
+            add_action( "wp_ajax_{$key}", [ $this, $method ] );
         }
     }
 
+    // -------------------------------------------------------------------------
+    // Shared helpers
+    // -------------------------------------------------------------------------
+
     /**
-     * AJAX Request
-     * ----
+     * Send a standardised "not allowed" error and exit.
+     */
+    private function sendNotAllowed(): void {
+        wp_send_json_error( [
+            'code'    => 'not_allowed',
+            'title'   => esc_html__( 'Sorry!', 'aarambha-demo-sites' ),
+            'message' => esc_html__( 'This action cannot be performed now. Please try again later!', 'aarambha-demo-sites' ),
+        ] );
+    }
+
+    /**
+     * Build the "advance to next step" response array.
+     *
+     * @param array       $steps     Full steps array from the request.
+     * @param int         $index     Current stepsIndex.
+     * @param array       $extra     Any extra keys to merge into the response.
+     * @return array
+     */
+    private function nextStepResponse( array $steps, int $index, array $extra = [] ): array {
+        $nextStep = $steps[ $index + 1 ] ?? 'finalize';
+        $nonceKey = "import-{$nextStep}";
+
+        return array_merge(
+            [
+                'nonce'  => wp_create_nonce( $nonceKey ),
+                'action' => $nextStep,
+                'steps'  => $steps,
+            ],
+            $extra
+        );
+    }
+
+    // -------------------------------------------------------------------------
+    // AJAX: retrieve-demo
+    // -------------------------------------------------------------------------
+
+    /**
      * Queries the API to get full demo details.
-     * 
-     * @uses wp_send_json_success()
-     * @uses wp_send_json_error()
-     * 
-     * @return array
      */
-    public function retrieveDemo()
-    {
+    public function retrieveDemo(): void {
+        $demo     = sanitize_text_field( $_REQUEST['demo']     ?? '' );
+        $demoType = sanitize_text_field( $_REQUEST['demoType'] ?? '' );
 
-        $demo     = sanitize_text_field($_REQUEST['demo']);
-        $demoType = sanitize_text_field($_REQUEST['demoType']);
-
-        $nonceKey = "retrieve-demo-{$demo}";
-
-        if (!wp_verify_nonce($_REQUEST['nonce'], $nonceKey)) {
-            // Nonce cannot be verified. Try again later.
-            $response = [
-                'code'    => 'not_allowed',
-                'title'   => esc_html__('Sorry!', 'aarambha-demo-sites'),
-                'message' => esc_html__('This action cannot be performed now. Please try again later!', 'aarambha-demo-sites')
-            ];
-
-            wp_send_json_error($response);
+        if ( ! wp_verify_nonce( $_REQUEST['nonce'] ?? '', "retrieve-demo-{$demo}" ) ) {
+            $this->sendNotAllowed();
         }
 
-        $result = Aarambha_DS()->api()->demo($demo, $demoType);
+        $result = Aarambha_DS()->api()->demo( $demo, $demoType );
 
-        if ($result['success']) {
-
-            // We've retrieved the demo information.
-            // Break provided information.
-            $resDemo     = $result['data'];
-            $information = [];
-
-            $information['name']    = $resDemo['name'];
-            $information['slug']    = $resDemo['slug'];
-            $information['image']   = $resDemo['image'];
-            $information['preview'] = $resDemo['preview'];
-
-            wp_send_json_success(['demo' => $information]);
-        } else {
-            wp_send_json_error([
-                'title' => $result['title'],
-                'message' => $result['message'],
-            ]);
+        if ( $result['success'] ) {
+            $resDemo = $result['data'];
+            wp_send_json_success( [
+                'demo' => [
+                    'name'    => $resDemo['name'],
+                    'slug'    => $resDemo['slug'],
+                    'image'   => $resDemo['image'],
+                    'preview' => $resDemo['preview'],
+                ],
+            ] );
         }
+
+        wp_send_json_error( [
+            'title'   => $result['title']   ?? esc_html__( 'Sorry!', 'aarambha-demo-sites' ),
+            'message' => $result['message'] ?? esc_html__( 'Something went wrong.', 'aarambha-demo-sites' ),
+        ] );
     }
 
+    // -------------------------------------------------------------------------
+    // AJAX: list-plugins
+    // -------------------------------------------------------------------------
+
     /**
-     * AJAX Request
-     * ----
-     * List the plugins used in the demo.
-     * 
-     * @uses wp_send_json_success()
-     * @uses wp_send_json_error()
-     * 
-     * @return array
+     * Returns the list of required plugins for the demo, with install/active state.
      */
-    public function listPlugins()
-    {
-        $theme   = aarambha_ds_get_theme();
-        $slug    = sanitize_text_field($_REQUEST['slug']);
+    public function listPlugins(): void {
+        $slug  = sanitize_text_field( $_REQUEST['slug'] ?? '' );
+        $theme = aarambha_ds_get_theme();
 
-        if (!wp_verify_nonce($_REQUEST['nonce'], 'list-plugins')) {
-
-            // Nonce cannot be verified. Try again later.
-            $response = [
-                'code'    => 'not_allowed',
-                'title'   => esc_html__('Sorry!', 'aarambha-demo-sites'),
-                'message' => esc_html__('This action cannot be performed now. Please try again later!', 'aarambha-demo-sites')
-            ];
-
-            wp_send_json_error($response);
+        if ( ! wp_verify_nonce( $_REQUEST['nonce'] ?? '', 'list-plugins' ) ) {
+            $this->sendNotAllowed();
         }
 
         $demoKey = "aarambha_ds_{$theme}_demo_{$slug}";
+        $result  = get_site_transient( $demoKey );
 
-        $result  = get_site_transient($demoKey);
-
-        if ($result) {
+        if ( $result ) {
             $demo = $result['data'];
 
-            if (isset($demo['plugins'])) {
-                $status = Aarambha_DS()->plugins()
-                    ->runtime($demo)
-                    ->html();
+            // Pass through even when plugins key is absent — runtime() handles
+            // wc_support injection so a WC-only demo still shows the WC row.
+            $status = Aarambha_DS()->plugins()
+                ->runtime( $demo )
+                ->html();
 
-                wp_send_json_success($status);
-            }
+            wp_send_json_success( $status );
         }
 
-        // Nonce cannot be verified. Try again later.
-        $response = [
-            'title'   => esc_html__('Sorry!', 'aarambha-demo-sites'),
-            'message' => esc_html__('This action cannot be performed now. Please try again later!', 'aarambha-demo-sites')
-        ];
-
-        wp_send_json_error($response);
+        $this->sendNotAllowed();
     }
 
-    /**
-     * AJAX Request
-     * ----
-     * Install the plugin.
-     * 
-     * @uses wp_send_json_success()
-     * @uses wp_send_json_error()
-     * 
-     * @return array
-     */
-    public function installPlugin()
-    {
-        $plugin  = sanitize_text_field($_REQUEST['slug']);
+    // -------------------------------------------------------------------------
+    // AJAX: ocdi-install-plugin
+    // -------------------------------------------------------------------------
 
+    /**
+     * Installs a plugin from WordPress.org (or our API for pro plugins).
+     */
+    public function installPlugin(): void {
+        $plugin   = sanitize_text_field( $_REQUEST['slug'] ?? '' );
         $nonceKey = "install-{$plugin}";
 
-        if (!wp_verify_nonce($_REQUEST['nonce'], $nonceKey)) {
-            // Nonce cannot be verified. Try again later.
-            $response = [
-                'code'    => 'not_allowed',
-                'title'   => esc_html__('Sorry!', 'aarambha-demo-sites'),
-                'message' => esc_html__('This action cannot be performed now. Please try again later!', 'aarambha-demo-sites')
-            ];
-
-            wp_send_json_error($response);
+        if ( ! wp_verify_nonce( $_REQUEST['nonce'] ?? '', $nonceKey ) ) {
+            $this->sendNotAllowed();
         }
 
-        $result = Aarambha_DS()->plugins()->ajaxInstall($plugin);
+        $result = Aarambha_DS()->plugins()->ajaxInstall( $plugin );
 
-        if (isset($result['success']) && !$result['success']) {
-            // Nonce cannot be verified. Try again later.
-            $response = [
-                'code'    => 'not_allowed',
-                'title'   => esc_html__('Sorry!', 'aarambha-demo-sites'),
-                'message' => esc_html__('This action cannot be performed now. Please try again later!', 'aarambha-demo-sites')
-            ];
-
-            wp_send_json_error($response);
+        if ( empty( $result['success'] ) ) {
+            wp_send_json_error( [
+                'code'    => 'install_failed',
+                'title'   => esc_html__( 'Sorry!', 'aarambha-demo-sites' ),
+                'message' => $result['errorMessage'] ?? esc_html__( 'Plugin installation failed.', 'aarambha-demo-sites' ),
+            ] );
         }
 
-        $key = "activate-{$plugin}";
-
-        $response = [];
-        $response['status'] = 'activate';
-        $response['nonce']  = wp_create_nonce($key);
-        wp_send_json_success($response);
+        wp_send_json_success( [
+            'status' => 'activate',
+            'nonce'  => wp_create_nonce( "activate-{$plugin}" ),
+        ] );
     }
 
+    // -------------------------------------------------------------------------
+    // AJAX: ocdi-activate-plugin
+    // -------------------------------------------------------------------------
+
     /**
-     * AJAX Request
-     * ----
-     * Activate the plugin.
-     * 
-     * @uses wp_send_json_success()
-     * @uses wp_send_json_error()
-     * 
-     * @return array
+     * Activates an already-installed plugin.
      */
-    public function activatePlugin()
-    {
+    public function activatePlugin(): void {
+        $plugin     = sanitize_text_field( $_REQUEST['slug']     ?? '' );
+        $pluginFile = sanitize_text_field( $_REQUEST['coreFile'] ?? '' );
+        $nonceKey   = "activate-{$plugin}";
 
-        $plugin  = sanitize_text_field($_REQUEST['slug']);
-
-        $nonceKey = "activate-{$plugin}";
-
-        $response = [];
-
-        if (!wp_verify_nonce($_REQUEST['nonce'], $nonceKey)) {
-            // Nonce cannot be verified. Try again later.
-            $response = [
-                'code'    => 'not_allowed',
-                'title'   => esc_html__('Sorry!', 'aarambha-demo-sites'),
-                'message' => esc_html__('This action cannot be performed now. Please try again later!', 'aarambha-demo-sites')
-            ];
-
-            wp_send_json_error($response);
+        if ( ! wp_verify_nonce( $_REQUEST['nonce'] ?? '', $nonceKey ) ) {
+            $this->sendNotAllowed();
         }
 
-        $pluginFile = sanitize_text_field($_REQUEST['coreFile']);
+        $activated = Aarambha_DS()->plugins()->activate( $pluginFile );
 
-        $status = Aarambha_DS()->plugins()->activate($pluginFile);
-
-        if (!$status) {
-            wp_send_json_error();
+        if ( ! $activated ) {
+            wp_send_json_error( [
+                'code'    => 'activation_failed',
+                'title'   => esc_html__( 'Sorry!', 'aarambha-demo-sites' ),
+                'message' => esc_html__( 'Plugin activation failed. Please try manually.', 'aarambha-demo-sites' ),
+            ] );
         }
 
-        $response = [];
-        $response['status'] = 'activated';
-        wp_send_json_success($response);
+        wp_send_json_success( [ 'status' => 'activated' ] );
     }
 
-    /**
-     * AJAX Request
-     * ----
-     * Prepares the import files.
-     * 
-     * @return wp_send_json_{success|error} Success or Error depending upon.
-     */
-    public function prepareImport()
-    {
-
-        if (!wp_verify_nonce($_REQUEST['nonce'])) {
-            // Nonce cannot be verified. Try again later.
-            $response = [
-                'title'   => esc_html__('Sorry!', 'aarambha-demo-sites'),
-                'message' => esc_html__('This action cannot be performed now. Please try again later!', 'aarambha-demo-sites')
-            ];
-
-            wp_send_json_error($response);
-        }
-
-        $theme        = aarambha_ds_get_theme();
-        $slug         = sanitize_text_field($_REQUEST['slug']);
-
-        $steps        = aarambha_ds_sanitize_text_or_array_field( $_REQUEST['steps'] );
-        $demo         = Aarambha_DS()->demo($slug);
-
-        $importer     = Aarambha_DS()->importer();
-        $writtenFiles = $importer->prepare($demo);
-
-        if (is_array($writtenFiles) && count($writtenFiles) > 0) {
-
-            // Delete Posts.
-            wp_delete_post(1, true); // Hello World Post
-            wp_delete_post(2, true); // Sample Page
-            wp_delete_post(3, true); // Privacy Policy Page.
-
-            // We need the files to proceed further.
-            $response = [
-                'files'  => $writtenFiles,
-                'steps'  => $steps,
-                'action' => 'import-content',
-                'nonce'  => wp_create_nonce('import-content'),
-                'demo'   => $slug,
-            ];
-
-            wp_send_json_success($response);
-        }
-
-
-        $response = [
-            'title'   => esc_html__('Sorry!', 'aarambha-demo-sites'),
-            'message' => esc_html__('This action cannot be performed now. Please try again later!', 'aarambha-demo-sites')
-        ];
-
-        wp_send_json_error($response);
-    }
+    // -------------------------------------------------------------------------
+    // AJAX: prepare-import
+    // -------------------------------------------------------------------------
 
     /**
-     * AJAX Request
-     * ----
-     * Imports the content
-     * 
-     * @return wp_send_json_{success|error} Success or Error depending upon.
+     * Downloads demo files and prepares for the import sequence.
      */
-    public function importContent()
-    {
-
-        if (!wp_verify_nonce($_REQUEST['nonce'], 'import-content')) {
-            // Nonce cannot be verified. Try again later.
-            $response = [
-                'title'   => esc_html__('Sorry!', 'aarambha-demo-sites'),
-                'message' => esc_html__('This action cannot be performed now. Please try again later!', 'aarambha-demo-sites')
-            ];
-
-            wp_send_json_error($response);
+    public function prepareImport(): void {
+        if ( ! wp_verify_nonce( $_REQUEST['nonce'] ?? '' ) ) {
+            $this->sendNotAllowed();
         }
 
-        unset($_REQUEST['nonce']);
-        unset($_REQUEST['action']);
+        $slug  = sanitize_text_field( $_REQUEST['slug'] ?? '' );
+        $steps = aarambha_ds_sanitize_text_or_array_field( $_REQUEST['steps'] ?? [] );
+        $demo  = Aarambha_DS()->demo( $slug );
 
-        // Actually begin the import process.
-        $slug       = sanitize_text_field( $_REQUEST['slug'] );
+        $writtenFiles = Aarambha_DS()->importer()->prepare( $demo );
 
-        $demosDir   = aarambha_ds_get_demos_dir($slug);
-        $files      = aarambha_ds_sanitize_text_or_array_field( $_REQUEST['files'] );
-        $filename   = $files['content'];
+        if ( ! is_array( $writtenFiles ) || count( $writtenFiles ) < 1 ) {
+            wp_send_json_error( [
+                'title'   => esc_html__( 'Sorry!', 'aarambha-demo-sites' ),
+                'message' => esc_html__( 'This action cannot be performed now. Please try again later!', 'aarambha-demo-sites' ),
+            ] );
+        }
 
+        // Remove default WP starter content so the demo is clean.
+        wp_delete_post( 1, true ); // Hello World
+        wp_delete_post( 2, true ); // Sample Page
+        wp_delete_post( 3, true ); // Privacy Policy
 
-        $file       = wp_normalize_path("{$demosDir}/$filename");
-
-        $import     = Aarambha_DS()
-                        ->importer()
-                        ->content($file, aarambha_ds_sanitize_text_or_array_field ($_REQUEST) );
-
-
-        $steps    = aarambha_ds_sanitize_text_or_array_field( $_REQUEST['steps'] );
-        $index    = isset($_REQUEST['stepsIndex']) ? absint( $_REQUEST['stepsIndex'] ) + 1 : 1;
-        $nextStep = $steps[$index];
-
-
-        $nonceKey = "import-{$nextStep}";
-
-        $response = [
-            'nonce'  => wp_create_nonce($nonceKey),
-            'action' => $nextStep,
+        wp_send_json_success( [
+            'files'  => $writtenFiles,
             'steps'  => $steps,
-            'files'  => $files,
-        ];
-
-        wp_send_json_success($response);
+            'action' => 'import-content',
+            'nonce'  => wp_create_nonce( 'import-content' ),
+            'demo'   => $slug,
+        ] );
     }
 
+    // -------------------------------------------------------------------------
+    // AJAX: content-import
+    // -------------------------------------------------------------------------
+
     /**
-     * AJAX Request
-     * ----
-     * Imports the customizer data.
-     * 
-     * @return wp_send_json_{success|error} Success or Error depending upon.
+     * Runs the WXR content import.
      */
-    public function importCustomize()
-    {
-
-        if (!wp_verify_nonce($_REQUEST['nonce'], 'import-customizer')) {
-            // Nonce cannot be verified. Try again later.
-            $response = [
-                'title'   => esc_html__('Sorry!', 'aarambha-demo-sites'),
-                'message' => esc_html__('This action cannot be performed now. Please try again later!', 'aarambha-demo-sites')
-            ];
-
-            wp_send_json_error($response);
+    public function importContent(): void {
+        if ( ! wp_verify_nonce( $_REQUEST['nonce'] ?? '', 'import-content' ) ) {
+            $this->sendNotAllowed();
         }
 
-        // Actually begin the import process.
-        $slug       = sanitize_text_field( $_REQUEST['slug'] );
+        unset( $_REQUEST['nonce'], $_REQUEST['action'] );
 
-        $demosDir   = aarambha_ds_get_demos_dir($slug);
-        $files      = is_array($_REQUEST['files']) ? aarambha_ds_sanitize_text_or_array_field( $_REQUEST['files'] ) : [];
+        $slug     = sanitize_text_field( $_REQUEST['slug'] ?? '' );
+        $files    = aarambha_ds_sanitize_text_or_array_field( $_REQUEST['files'] ?? [] );
+        $steps    = aarambha_ds_sanitize_text_or_array_field( $_REQUEST['steps'] ?? [] );
+        $index    = isset( $_REQUEST['stepsIndex'] ) ? absint( $_REQUEST['stepsIndex'] ) : 0;
 
-        $filename   = $files['customizer'];
+        $demosDir = aarambha_ds_get_demos_dir( $slug );
+        $file     = wp_normalize_path( "{$demosDir}/{$files['content']}" );
 
+        Aarambha_DS()->importer()->content(
+            $file,
+            aarambha_ds_sanitize_text_or_array_field( $_REQUEST )
+        );
 
-        $file       = wp_normalize_path("{$demosDir}/$filename");
-
-        $status     = Aarambha_DS()->importer()->customizer($file);
-
-        $steps    = aarambha_ds_sanitize_text_or_array_field( $_REQUEST['steps'] );
-        $index    = absint( $_REQUEST['stepsIndex'] ) + 1;
-        $nextStep = $steps[$index];
-        $nonceKey = "import-{$nextStep}";
-        
-
-        $response = [
-            'nonce'  => wp_create_nonce($nonceKey),
-            'action' => $nextStep,
-            'steps'  => $steps,
-            'files'  => $files,
-        ];
-
-        wp_send_json_success($response);
+        wp_send_json_success(
+            $this->nextStepResponse( $steps, $index, [ 'files' => $files ] )
+        );
     }
 
+    // -------------------------------------------------------------------------
+    // AJAX: customizer-import
+    // -------------------------------------------------------------------------
+
     /**
-     * AJAX Request
-     * ----
-     * Imports the widget data.
-     * 
-     * @return wp_send_json_{success|error} Success or Error depending upon.
+     * Imports customizer (theme_mod) data.
      */
-    public function importWidget()
-    {
-
-        if (!wp_verify_nonce($_REQUEST['nonce'], 'import-widgets')) {
-            // Nonce cannot be verified. Try again later.
-            $response = [
-                'title'   => esc_html__('Sorry!', 'aarambha-demo-sites'),
-                'message' => esc_html__('This action cannot be performed now. Please try again later!', 'aarambha-demo-sites')
-            ];
-
-            wp_send_json_error($response);
+    public function importCustomize(): void {
+        if ( ! wp_verify_nonce( $_REQUEST['nonce'] ?? '', 'import-customizer' ) ) {
+            $this->sendNotAllowed();
         }
 
-        // Actually begin the import process.
-        $slug       = sanitize_text_field( $_REQUEST['slug'] );
+        $slug  = sanitize_text_field( $_REQUEST['slug'] ?? '' );
+        $files = is_array( $_REQUEST['files'] ?? null )
+            ? aarambha_ds_sanitize_text_or_array_field( $_REQUEST['files'] )
+            : [];
+        $steps = aarambha_ds_sanitize_text_or_array_field( $_REQUEST['steps'] ?? [] );
+        $index = absint( $_REQUEST['stepsIndex'] ?? 0 );
 
-        $demosDir   = aarambha_ds_get_demos_dir($slug);
-        $files      = aarambha_ds_sanitize_text_or_array_field( $_REQUEST['files'] );
+        $demosDir = aarambha_ds_get_demos_dir( $slug );
+        $file     = wp_normalize_path( "{$demosDir}/{$files['customizer']}" );
 
-        $filename   = $files['widgets'];
+        Aarambha_DS()->importer()->customizer( $file );
 
-
-        $file       = wp_normalize_path("{$demosDir}/$filename");
-
-        $status     = Aarambha_DS()->importer()->widgets($file);
-
-        $steps    = aarambha_ds_sanitize_text_or_array_field( $_REQUEST['steps'] );
-        $index    = absint( $_REQUEST['stepsIndex'] ) + 1;
-        $nextStep = $steps[$index];
-
-        $nonceKey = "import-{$nextStep}";
-
-        $response = [
-            'nonce'  => wp_create_nonce($nonceKey),
-            'action' => $nextStep,
-            'steps'  => $steps,
-            'files'  => $files,
-        ];
-
-        wp_send_json_success($response);
+        wp_send_json_success(
+            $this->nextStepResponse( $steps, $index, [ 'files' => $files ] )
+        );
     }
 
+    // -------------------------------------------------------------------------
+    // AJAX: widgets-import
+    // -------------------------------------------------------------------------
+
     /**
-     * AJAX Request
-     * ----
-     * Imports the slider.
-     * 
-     * @return wp_send_json_{success|error} Success or Error depending upon.
+     * Imports widget data.
      */
-    public function importSlider()
-    {
-
-        if (!wp_verify_nonce($_REQUEST['nonce'], 'import-slider')) {
-            // Nonce cannot be verified. Try again later.
-            $response = [
-                'title'   => esc_html__('Sorry!', 'aarambha-demo-sites'),
-                'message' => esc_html__('This action cannot be performed now. Please try again later!', 'aarambha-demo-sites')
-            ];
-
-            wp_send_json_error($response);
+    public function importWidget(): void {
+        if ( ! wp_verify_nonce( $_REQUEST['nonce'] ?? '', 'import-widgets' ) ) {
+            $this->sendNotAllowed();
         }
 
-        // Import the slider.
-        $slug       = sanitize_text_field( $_REQUEST['slug'] );
+        $slug  = sanitize_text_field( $_REQUEST['slug'] ?? '' );
+        $files = aarambha_ds_sanitize_text_or_array_field( $_REQUEST['files'] ?? [] );
+        $steps = aarambha_ds_sanitize_text_or_array_field( $_REQUEST['steps'] ?? [] );
+        $index = absint( $_REQUEST['stepsIndex'] ?? 0 );
 
-        $demosDir   = aarambha_ds_get_demos_dir($slug);
-        $files      = aarambha_ds_sanitize_text_or_array_field( $_REQUEST['files'] );
-        $sliders    = $files['slider'];
+        $demosDir = aarambha_ds_get_demos_dir( $slug );
+        $file     = wp_normalize_path( "{$demosDir}/{$files['widgets']}" );
 
-        if (class_exists('SmartSlider3') && is_array($sliders) && count($sliders) > 0) {
+        Aarambha_DS()->importer()->widgets( $file );
 
+        wp_send_json_success(
+            $this->nextStepResponse( $steps, $index, [ 'files' => $files ] )
+        );
+    }
+
+    // -------------------------------------------------------------------------
+    // AJAX: slider-import
+    // -------------------------------------------------------------------------
+
+    /**
+     * Imports Smart Slider data (no-op when SmartSlider3 is not active).
+     */
+    public function importSlider(): void {
+        if ( ! wp_verify_nonce( $_REQUEST['nonce'] ?? '', 'import-slider' ) ) {
+            $this->sendNotAllowed();
+        }
+
+        $slug    = sanitize_text_field( $_REQUEST['slug'] ?? '' );
+        $files   = aarambha_ds_sanitize_text_or_array_field( $_REQUEST['files'] ?? [] );
+        $steps   = aarambha_ds_sanitize_text_or_array_field( $_REQUEST['steps'] ?? [] );
+        $index   = absint( $_REQUEST['stepsIndex'] ?? 0 );
+        $sliders = $files['slider'] ?? [];
+
+        if ( class_exists( 'SmartSlider3' ) && is_array( $sliders ) && count( $sliders ) > 0 ) {
             require_once AARAMBHA_DS_CLASSES . 'class-aarambha-ds-smart-slider.php';
 
             Aarambha_DS_Smart_Slider::delete();
 
-            foreach ($sliders as $slider) {
-                $sliderFile = $slider['file'];
-                $file = "{$demosDir}/{$sliderFile}";
-                Aarambha_DS()->importer()->slider($file);
+            $demosDir = aarambha_ds_get_demos_dir( $slug );
+            foreach ( $sliders as $slider ) {
+                $file = "{$demosDir}/{$slider['file']}";
+                Aarambha_DS()->importer()->slider( $file );
             }
         }
 
-        $steps = aarambha_ds_sanitize_text_or_array_field( $_REQUEST['steps'] );
-        $index = (int) $_REQUEST['stepsIndex'] + 1;
-        $nextStep = $steps[$index];
-
-        $nonceKey = "import-{$nextStep}";
-
-        $response = [
-            'nonce'  => wp_create_nonce($nonceKey),
-            'action' => $nextStep,
-            'steps'  => $steps,
-        ];
-
-        wp_send_json_success($response);
+        wp_send_json_success(
+            $this->nextStepResponse( $steps, $index )
+        );
     }
 
+    // -------------------------------------------------------------------------
+    // AJAX: menu-import
+    // -------------------------------------------------------------------------
+
     /**
-     * AJAX Request
-     * ----
-     * Imports the menu.
-     * 
-     * @return wp_send_json_{success|error} Success or Error depending upon.
+     * Assigns imported nav menus to theme locations.
      */
-    public function importMenu()
-    {
-
-        if (!wp_verify_nonce($_REQUEST['nonce'], 'import-menu')) {
-            // Nonce cannot be verified. Try again later.
-            $response = [
-                'title'   => esc_html__('Sorry!', 'aarambha-demo-sites'),
-                'message' => esc_html__('This action cannot be performed now. Please try again later!', 'aarambha-demo-sites')
-            ];
-
-            wp_send_json_error($response);
+    public function importMenu(): void {
+        if ( ! wp_verify_nonce( $_REQUEST['nonce'] ?? '', 'import-menu' ) ) {
+            $this->sendNotAllowed();
         }
 
-        $slug       = sanitize_text_field($_REQUEST['slug']);
-        $demo       = Aarambha_DS()->demo($slug);
+        $slug  = sanitize_text_field( $_REQUEST['slug'] ?? '' );
+        $demo  = Aarambha_DS()->demo( $slug );
+        $steps = aarambha_ds_sanitize_text_or_array_field( $_REQUEST['steps'] ?? [] );
+        $index = absint( $_REQUEST['stepsIndex'] ?? 0 );
 
-        $navigation = aarambha_ds_sanitize_text_or_array_field( $demo['menus'] );
+        $navigation = aarambha_ds_sanitize_text_or_array_field( $demo['menus'] ?? [] );
+        Aarambha_DS()->importer()->setupNavigation( $navigation );
 
-        Aarambha_DS()->importer()->setupNavigation($navigation);
-
-        $steps = aarambha_ds_sanitize_text_or_array_field( $_REQUEST['steps'] );
-        $index = absint( $_REQUEST['stepsIndex'] ) + 1;
-        $nextStep = $steps[$index];
-
-        $nonceKey = "import-{$nextStep}";
-
-        $response = [
-            'nonce'  => wp_create_nonce($nonceKey),
-            'action' => $nextStep,
-            'steps'  => $steps,
-        ];
-
-        wp_send_json_success($response);
+        wp_send_json_success(
+            $this->nextStepResponse( $steps, $index )
+        );
     }
 
+    // -------------------------------------------------------------------------
+    // AJAX: pages-import
+    // -------------------------------------------------------------------------
 
     /**
-     * AJAX Request
-     * ----
-     * Basicallys sets up the page reading.
-     * 
-     * @return wp_send_json_{success|error} Success or Error depending upon.
+     * Sets the front page, blog page.
+     * WooCommerce page wiring is intentionally deferred to finalize() so it
+     * runs after ALL content is in the DB (deduplication works correctly).
      */
-    public function importPages()
-    {
-
-        if (!wp_verify_nonce($_REQUEST['nonce'], 'import-pages')) {
-            // Nonce cannot be verified. Try again later.
-            $response = [
-                'title'   => esc_html__('Sorry!', 'aarambha-demo-sites'),
-                'message' => esc_html__('This action cannot be performed now. Please try again later!', 'aarambha-demo-sites')
-            ];
-
-            wp_send_json_error($response);
+    public function importPages(): void {
+        if ( ! wp_verify_nonce( $_REQUEST['nonce'] ?? '', 'import-pages' ) ) {
+            $this->sendNotAllowed();
         }
 
-        // Setup the pages.
-        $slug       = sanitize_text_field($_REQUEST['slug']);
-        $demo       = Aarambha_DS()->demo($slug);
+        $slug  = sanitize_text_field( $_REQUEST['slug'] ?? '' );
+        $demo  = Aarambha_DS()->demo( $slug );
+        $pages = aarambha_ds_sanitize_text_or_array_field( $demo['pages'] ?? [] );
+        $steps = aarambha_ds_sanitize_text_or_array_field( $_REQUEST['steps'] ?? [] );
+        $index = absint( $_REQUEST['stepsIndex'] ?? 0 );
 
-        $pages      = aarambha_ds_sanitize_text_or_array_field( $demo['pages'] );
-
-        $wcSupport  = false;
-
-        if (isset($demo['wcSupport']) && $demo['wcSupport']) {
-            $wcSupport = true;
-        }
-
-        $frontPage = isset( $pages['homepage'] ) ? $pages['homepage'] : false;
-        $blogPage  = (isset($pages['postpage'])) ? $pages['postpage'] : false;
-
-        if ( $frontPage ) {
-            $homePage  = get_page_by_title($frontPage);
-
-            if (isset($homePage->ID)){
-                update_option('show_on_front', 'page');
-                update_option('page_on_front', $homePage->ID);
-            }
-        } 
-
-        if ( $blogPage ) {
-            $postsPage = get_page_by_title($blogPage);
-
-            if (isset($postsPage->ID)) {
-                update_option('page_for_posts', $postsPage->ID);
+        // ── Front page ───────────────────────────────────────────────────────
+        $frontPageTitle = $pages['homepage'] ?? false;
+        if ( $frontPageTitle ) {
+            $homePage = get_page_by_title( $frontPageTitle );
+            if ( isset( $homePage->ID ) ) {
+                update_option( 'show_on_front', 'page' );
+                update_option( 'page_on_front',  $homePage->ID );
             }
         }
 
-        if ($wcSupport) {
-            $wc_pages = [
-                'shop'          => 'Store',
-                'cart'          => 'Cart',
-                'checkout'      => 'Checkout',
-                'myaccount'     => 'My account',
-            ];
-
-            // Setup WooCommerce Pages.
-            if (is_array($wc_pages) && function_exists('WC') && count($wc_pages) > 0) {
-
-                foreach ($wc_pages as $slug => $title) {
-
-                    $woopage = get_page_by_title(html_entity_decode($title));
-                    if (isset($woopage) && property_exists($woopage, 'ID')) {
-
-                        // prepare WooCommerce option slug where pages are stored.
-                        $key = "woocommerce_{$slug}_page_id";
-                        update_option($key, $woopage->ID);
-                    }
-                }
+        // ── Blog / posts page ────────────────────────────────────────────────
+        $blogPageTitle = $pages['postpage'] ?? false;
+        if ( $blogPageTitle ) {
+            $postsPage = get_page_by_title( $blogPageTitle );
+            if ( isset( $postsPage->ID ) ) {
+                update_option( 'page_for_posts', $postsPage->ID );
             }
         }
 
-        $steps    = aarambha_ds_sanitize_text_or_array_field( $_REQUEST['steps'] );
-        $index    = absint( $_REQUEST['stepsIndex'] ) + 1;
-        $nextStep = $steps[$index];
+        // NOTE: WooCommerce pages are handled in finalize() via
+        // Aarambha_DS()->plugins()->setupWooCommercePages() which deduplicates
+        // imported pages and is the correct place after all content is in the DB.
 
-        $nonceKey = "import-{$nextStep}";
-
-        $response = [
-            'nonce'  => wp_create_nonce($nonceKey),
-            'action' => $nextStep,
-            'steps'  => $steps
-        ];
-
-        wp_send_json_success($response);
+        wp_send_json_success(
+            $this->nextStepResponse( $steps, $index )
+        );
     }
-    
+
+    // -------------------------------------------------------------------------
+    // AJAX: finalize-import
+    // -------------------------------------------------------------------------
+
     /**
-     * AJAX Request
-     * ----
-     * Finalize the import.
-     * 
-     * @return wp_send_json_{success|error} Success or Error depending upon.
+     * Finalizes the import:
+     *  1. Wires up WooCommerce pages with deduplication (if WC is active).
+     *  2. Fires the aarambha_ds_after_demo_imported action.
+     *  3. Flushes rewrite rules.
      */
-    public function finalize()
-    {
-
-        if (!wp_verify_nonce($_REQUEST['nonce'], 'import-finalize')) {
-            // Nonce cannot be verified. Try again later.
-            $response = [
-                'title'   => esc_html__('Sorry!', 'aarambha-demo-sites'),
-                'message' => esc_html__('This action cannot be performed now. Please try again later!', 'aarambha-demo-sites')
-            ];
-
-            wp_send_json_error($response);
+    public function finalize(): void {
+        if ( ! wp_verify_nonce( $_REQUEST['nonce'] ?? '', 'import-finalize' ) ) {
+            $this->sendNotAllowed();
         }
 
-        // Add Hook
+        $slug = sanitize_text_field( $_REQUEST['slug'] ?? '' );
+
+        // ── WooCommerce page setup ────────────────────────────────────────────
+        // Runs here — after ALL content steps — so every imported page is
+        // already in the DB. setupWooCommercePages() will:
+        //   • find shop / cart / checkout / my-account pages by name or title
+        //   • keep the highest-ID copy, permanently delete duplicates
+        //   • save woocommerce_{key}_page_id options
+        //   • delete the _wc_activation_redirect transient
+        // It is a no-op when WooCommerce is not active.
+        Aarambha_DS()->plugins()->setupWooCommercePages( $slug );
+        // ─────────────────────────────────────────────────────────────────────
+
+        // Generic post-import hook: Elementor kit, FA4 shim, etc.
         do_action( 'aarambha_ds_after_demo_imported' );
 
-        flush_rewrite_rules(true);
+        flush_rewrite_rules( true );
 
-        $response = [
-            'action' => 'finalized',
-        ];
-
-        wp_send_json_success($response);
+        wp_send_json_success( [ 'action' => 'finalized' ] );
     }
 }

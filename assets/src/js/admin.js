@@ -420,7 +420,8 @@
                 totalPlugins = $plugins.length
 
             if ('undefined' == id || null == id) {
-                var count = pluginIndex
+                pluginIndex = 0
+                var count = 0
             } else {
                 var count = id
             }
@@ -514,11 +515,14 @@
                         if ('activate' == response.data.status) {
                             plugin.dataset.action = 'activate'
                             plugin.dataset.nonce = response.data.nonce
+                            pluginIndex = count
 
                             actionEl.innerHTML = aarambhaDSData.activating
 
                             if (count < totalPlugins) {
-                                aarambhaDS.installPlugins(event, count)
+                                setTimeout(() => {
+                                    aarambhaDS.installPlugins(event, count)
+                                }, 500)
                             }
                         }
 
