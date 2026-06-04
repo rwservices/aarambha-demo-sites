@@ -166,7 +166,15 @@ class Aarambha_DS_Core
         $path  = "{$dir}/$slug";
 
         if (!file_exists($path)) {
-            wp_mkdir_p(trailingslashit($path));
+            $result = wp_mkdir_p(trailingslashit($path));
+            
+            // Log error if directory creation failed
+            if (!$result) {
+                error_log(sprintf(
+                    '[Aarambha DS] Failed to create directory: %s (Check file permissions)',
+                    $path
+                ));
+            }
         }
 
         return $path;
@@ -214,17 +222,46 @@ class Aarambha_DS_Core
                         // Download the file.
                         $download = download_url($url);
 
-                        // Get the file content.
-                        $content = @file_get_contents($download);
+                        // Check if download was successful (no WP_Error)
+                        if (is_wp_error($download)) {
+                            error_log(sprintf(
+                                '[Aarambha DS] Failed to download file %s: %s',
+                                $name,
+                                $download->get_error_message()
+                            ));
+                            continue;
+                        }
 
-                        $file_handle = @fopen($file_name, 'w'); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
+                        // Get the file content.
+                        $content = file_get_contents($download); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_get_contents
+
+                        if ($content === false) {
+                            error_log(sprintf(
+                                '[Aarambha DS] Failed to read downloaded file: %s',
+                                $name
+                            ));
+                            continue;
+                        }
+
+                        $file_handle = fopen($file_name, 'w'); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
 
                         if ($file_handle) {
-                            $files[$key] = $file;
-
-                            fwrite($file_handle, $content); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fwrite
-
+                            $write_result = fwrite($file_handle, $content); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fwrite
                             fclose($file_handle); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fclose
+
+                            if ($write_result === false) {
+                                error_log(sprintf(
+                                    '[Aarambha DS] Failed to write file: %s',
+                                    $file_name
+                                ));
+                            } else {
+                                $files[$key] = $file;
+                            }
+                        } else {
+                            error_log(sprintf(
+                                '[Aarambha DS] Cannot open file for writing: %s (Check permissions)',
+                                $file_name
+                            ));
                         }
                     }
                 } else {
@@ -242,18 +279,46 @@ class Aarambha_DS_Core
                     // Download the file.
                     $download = download_url($url);
 
+                    // Check if download was successful (no WP_Error)
+                    if (is_wp_error($download)) {
+                        error_log(sprintf(
+                            '[Aarambha DS] Failed to download file %s: %s',
+                            $file,
+                            $download->get_error_message()
+                        ));
+                        continue;
+                    }
 
                     // Get the file content.
-                    $content = @file_get_contents($download);
+                    $content = file_get_contents($download); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_get_contents
 
-                    $file_handle = @fopen($file_name, 'w'); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
+                    if ($content === false) {
+                        error_log(sprintf(
+                            '[Aarambha DS] Failed to read downloaded file: %s',
+                            $file
+                        ));
+                        continue;
+                    }
+
+                    $file_handle = fopen($file_name, 'w'); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
 
                     if ($file_handle) {
-                        $files[$key] = $file;
-
-                        fwrite($file_handle, $content); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fwrite
-
+                        $write_result = fwrite($file_handle, $content); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fwrite
                         fclose($file_handle); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fclose
+
+                        if ($write_result === false) {
+                            error_log(sprintf(
+                                '[Aarambha DS] Failed to write file: %s',
+                                $file_name
+                            ));
+                        } else {
+                            $files[$key] = $file;
+                        }
+                    } else {
+                        error_log(sprintf(
+                            '[Aarambha DS] Cannot open file for writing: %s (Check permissions)',
+                            $file_name
+                        ));
                     }
                 }
             }

@@ -38,8 +38,9 @@ if (!defined('AARAMBHA_DS_API_URL')) {
     define('AARAMBHA_DS_API_URL', 'http://demo.aarambhathemes.com/wp-json/demos/v1/');
 }
 
-
-
+if ( ! defined( 'AARAMBHA_DS_RTL' ) ) {
+    define( 'AARAMBHA_DS_RTL', ( is_rtl() ) ? '-rtl' : '' );
+}
 
 // Plugin internal structure.
 define('AARAMBHA_DS_ROOT', $plugin_root);
@@ -58,9 +59,4 @@ define('AARAMBHA_DS_ASSETS', $plugin_uri . 'assets/');
 define('AARAMBHA_DS_IMAGES', AARAMBHA_DS_ASSETS . 'build/images/');
 define('AARAMBHA_DS_CSS', AARAMBHA_DS_ASSETS . 'build/css/');
 define('AARAMBHA_DS_JS', AARAMBHA_DS_ASSETS . 'build/js/');
-define('AARAMBHA_DS_LIBRARIES', AARAMBHA_DS_ASSETS . 'build/library/');
-
-// RTL suffix for assets.
-if ( ! defined( 'AARAMBHA_DS_RTL_SUFFIX' ) ) {
-    define( 'AARAMBHA_DS_RTL_SUFFIX', ( is_rtl() ) ? '-rtl' : '' );
-}
+define('AARAMBHA_DS_LIBRARY', AARAMBHA_DS_ASSETS . 'build/library/');
