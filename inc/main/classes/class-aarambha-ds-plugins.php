@@ -12,13 +12,11 @@ if (!defined('WPINC')) {
     exit;    // Exit if accessed directly.
 }
 
-
 /**
- * Class:: Aarambha_DS_Plugins
+ * Class Aarambha_DS_Plugins
  * 
  * Plugin installer.
  */
-
 class Aarambha_DS_Plugins
 {
     /**
@@ -32,7 +30,7 @@ class Aarambha_DS_Plugins
     private static $instance = null;
 
     /**
-     * Free & Pro Plugins.
+     * Free & Pro plugin data for the current demo.
      * 
      * @since 1.0.0
      * @access private
@@ -44,11 +42,8 @@ class Aarambha_DS_Plugins
     /**
      * Ensures only one instance of this class is available.
      * 
-     * 
-     * @version 1.0.0
      * @since 1.0.0
-     * 
-     * @return object Aarambha_DS_Ajax
+     * @return Aarambha_DS_Plugins
      */
     public static function getInstance()
     {
@@ -60,26 +55,11 @@ class Aarambha_DS_Plugins
         return self::$instance;
     }
 
-    /**
-     * A dummy constructor to prevent this class from being loaded more than once.
-     *
-     * @see Aarambha_DS_Ajax::getInstance()
-     *
-     * @since 1.0.0
-     * @access private
-     * @codeCoverageIgnore
-     */
     private function __construct()
     {
         /* We do nothing here! */
     }
 
-    /**
-     * You cannot clone this class.
-     *
-     * @since 1.0.0
-     * @codeCoverageIgnore
-     */
     public function __clone()
     {
         _doing_it_wrong(
@@ -89,12 +69,6 @@ class Aarambha_DS_Plugins
         );
     }
 
-    /**
-     * You cannot unserialize instances of this class.
-     *
-     * @since 1.0.0
-     * @codeCoverageIgnore
-     */
     public function __wakeup()
     {
         _doing_it_wrong(
@@ -105,62 +79,56 @@ class Aarambha_DS_Plugins
     }
 
     /**
-     * 
+     * Register WordPress hooks.
      */
     public function actions()
     {
-        // Hook into plugins api
         add_filter('plugins_api', [$this, 'pluginsApi'], 10, 3);
     }
 
     /**
-     * Sets the plugins.
-     * 
-     * @param array $demo Demo retrieved from the API.
-     * 
-     * @return Aarambha_DS_Plugins
+     * Stores demo plugin data and populates the pro-plugins transient.
+     *
+     * @param  array $demo Demo data array from the API.
+     * @return Aarambha_DS_Plugins  Fluent interface.
      */
     public function runtime($demo)
     {
-        $plugins = $demo['plugins'];
+        $plugins   = $demo['plugins'];
         $this->plugins = $plugins;
 
         $demo_name = $demo['slug'];
 
         $transient = get_site_transient('aarambha_ds_plugins');
 
-        if (!$transient) {
-            $transient = new stdClass();
+        if (!$transient || !is_object($transient)) {
+            $transient          = new stdClass();
             $transient->plugins = [];
         }
 
         if (isset($plugins['pro'])) {
-
             $proPlugins = $plugins['pro'];
-
             $pluginsArr = [];
 
             foreach ($proPlugins as $plugin) {
                 $pluginCoreFile = $plugin['coreFile'];
+                $slug           = $plugin['plugin'];
+                $file           = $plugin['plugin_file'];
 
-                $slug = $plugin['plugin'];
-                $file = $plugin['plugin_file'];
-
-                if (!in_array($pluginCoreFile, $plugins)) {
-
-                    $pluginObj = new stdClass();
-                    $pluginObj->name = $plugin['name'];
-                    $pluginObj->version = $plugin['version'];
-                    $pluginObj->slug = $slug;
-                    $pluginObj->plugin = $pluginCoreFile;
-                    $pluginObj->fileName = $file;
-                    $pluginObj->demo = $demo_name;
-                    $pluginObj->url = $demo['preview'];
+                if (!in_array($pluginCoreFile, $plugins, true)) {
+                    $pluginObj               = new stdClass();
+                    $pluginObj->name         = $plugin['name'];
+                    $pluginObj->version      = $plugin['version'];
+                    $pluginObj->slug         = $slug;
+                    $pluginObj->plugin       = $pluginCoreFile;
+                    $pluginObj->fileName     = $file;
+                    $pluginObj->demo         = $demo_name;
+                    $pluginObj->url          = $demo['preview'];
                     $pluginObj->download_link = Aarambha_DS()->api()->deferredDownload(
                         compact('slug', 'demo_name')
                     );
 
-                    array_push($pluginsArr, $pluginObj);
+                    $pluginsArr[] = $pluginObj;
                 }
             }
 
@@ -173,7 +141,7 @@ class Aarambha_DS_Plugins
     }
 
     /**
-     * Useful for injection.
+     * Ensures is_plugin_active() is available.
      */
     public function inject()
     {
@@ -182,9 +150,8 @@ class Aarambha_DS_Plugins
         }
     }
 
-
     /**
-     * Inject the installer.
+     * Ensures the plugin upgrader classes are available.
      */
     public function injectInstaller()
     {
@@ -198,11 +165,10 @@ class Aarambha_DS_Plugins
     }
 
     /**
-     * Check if plugin is installed.
-     * 
-     * @param string $pluginFile
-     * 
-     * @return bool.
+     * Checks whether a plugin is installed (i.e. its main file exists on disk).
+     *
+     * @param  string $pluginFile Relative path: folder/plugin-file.php
+     * @return bool
      */
     public function isInstalled($pluginFile = '')
     {
@@ -214,11 +180,10 @@ class Aarambha_DS_Plugins
     }
 
     /**
-     * Is plugin active check.
-     * 
-     * @param string $pluginFile
-     * 
-     * @return bool.
+     * Checks whether a plugin is currently active.
+     *
+     * @param  string $pluginFile Relative path: folder/plugin-file.php
+     * @return bool
      */
     public function isActive($pluginFile)
     {
@@ -232,26 +197,26 @@ class Aarambha_DS_Plugins
     }
 
     /**
-     * Prepare the plugins.
-     * 
-     * return $this
+     * Generates the plugin-list HTML and decides the next wizard step.
+     *
+     * @return array  ['step' => string, 'html' => string]
      */
     public function html()
     {
-        $free = (isset($this->plugins['free'])) ? $this->plugins['free'] : [];
-        $pro  = (isset($this->plugins['pro'])) ? $this->plugins['pro'] : [];
-
+        $free    = isset($this->plugins['free']) ? $this->plugins['free'] : [];
+        $pro     = isset($this->plugins['pro'])  ? $this->plugins['pro']  : [];
         $plugins = array_merge($free, $pro);
-        $total = count($plugins);
+        $total   = count($plugins);
 
         $activeLists = [];
 
         foreach ($plugins as $plugin) {
-
             if ($this->isActive($plugin['coreFile'])) {
-                array_push($activeLists, $plugin['coreFile']);
+                $activeLists[] = $plugin['coreFile'];
             }
         }
+
+        $status = [];
 
         if (count($activeLists) === $total) {
             $status['step'] = 'import';
@@ -265,35 +230,15 @@ class Aarambha_DS_Plugins
             Aarambha_DS()->view('plugins-list', $this->plugins);
         }
 
-        $content = ob_get_clean();
-        $status['html'] = $content;
+        $status['html'] = ob_get_clean();
 
         return $status;
     }
 
     /**
-     * Prepare the pro plugins.
-     */
-    public function prepare($plugin)
-    {
-    }
-
-    /**
-     * Install the plugin.
-     * 
-     * @param string $plugin 'plugin slug'
-     * 
-     * @return bool
-     */
-    public function install($plugin)
-    {
-    }
-
-    /**
-     * Activate the plugin.
-     * 
-     * @param string $plugin 'Plugin File'
-     * 
+     * Activates an installed plugin.
+     *
+     * @param  string $plugin Relative plugin path (folder/file.php).
      * @return bool
      */
     public function activate($plugin)
@@ -306,26 +251,18 @@ class Aarambha_DS_Plugins
 
         $status = activate_plugin($plugin);
 
-        if (!is_wp_error($status) || null !== $status) {
-            return true;
-        }
-
-        return false;
+        // activate_plugin() returns null on success, WP_Error on failure.
+        return !is_wp_error($status);
     }
 
-
     /**
-     * Install Plugin with AJAX
-     * 
-     * @see wp_ajax_install_plugin() from 'wp-admin/includes/ajax-actions.php'
-     * 
-     * Modified it to match our need.
-     * 
-     * @return array
+     * Installs a plugin from the WordPress.org repository via AJAX.
+     *
+     * @param  string $slug Plugin slug.
+     * @return array  Result array with 'success' key.
      */
     public function ajaxInstall($slug)
     {
-
         $status = [];
 
         if (empty($slug)) {
@@ -337,64 +274,51 @@ class Aarambha_DS_Plugins
 
         $api = plugins_api(
             'plugin_information',
-            array(
+            [
                 'slug'   => sanitize_key(wp_unslash($slug)),
-                'fields' => array(
-                    'sections' => false,
-                ),
-            )
+                'fields' => ['sections' => false],
+            ]
         );
 
         if (is_wp_error($api)) {
-
-            $status['success'] = false;
+            $status['success']      = false;
             $status['errorMessage'] = $api->get_error_message();
-
-            return  $status;
+            return $status;
         }
 
         $status['pluginName'] = $api->name;
 
         $skin     = new WP_Ajax_Upgrader_Skin();
         $upgrader = new Plugin_Upgrader($skin);
-
         $result   = $upgrader->install($api->download_link);
 
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            $status['success'] = false;
-
-            $status['debug'] = $skin->get_upgrade_messages();
-        }
-
         if (is_wp_error($result)) {
-            $status['success'] = false;
-
-
+            $status['success']      = false;
             $status['errorCode']    = $result->get_error_code();
             $status['errorMessage'] = $result->get_error_message();
-
             return $status;
-        } elseif (is_wp_error($skin->result)) {
-            $status['success'] = false;
+        }
 
-
+        if (is_wp_error($skin->result)) {
+            $status['success']      = false;
             $status['errorCode']    = $skin->result->get_error_code();
             $status['errorMessage'] = $skin->result->get_error_message();
             return $status;
-        } elseif ($skin->get_errors()->has_errors()) {
-            $status['success'] = false;
+        }
 
+        if ($skin->get_errors()->has_errors()) {
+            $status['success']      = false;
             $status['errorMessage'] = $skin->get_error_messages();
             return $status;
-        } elseif (is_null($result)) {
+        }
+
+        if (is_null($result)) {
             global $wp_filesystem;
 
-            $status['success'] = false;
-
-            $status['errorCode']    = 'unable_to_connect_to_filesystem';
+            $status['success']   = false;
+            $status['errorCode'] = 'unable_to_connect_to_filesystem';
             $status['errorMessage'] = __('Unable to connect to the filesystem. Please confirm your credentials.', 'aarambha-demo-sites');
 
-            // Pass through the error from WP_Filesystem if one was raised.
             if ($wp_filesystem instanceof WP_Filesystem_Base && is_wp_error($wp_filesystem->errors) && $wp_filesystem->errors->has_errors()) {
                 $status['errorMessage'] = esc_html($wp_filesystem->errors->get_error_message());
             }
@@ -408,30 +332,52 @@ class Aarambha_DS_Plugins
     }
 
     /**
-     * Modify the API response to include our plugin installer.
+     * Hooks into plugins_api to supply download links for pro plugins.
+     *
+     * FIX: previously assumed the transient always existed and was a valid object,
+     * causing a fatal error when no pro plugins were registered. Now guards against
+     * a missing or malformed transient and an empty plugins list.
+     *
+     * @param  mixed  $response  Current response.
+     * @param  string $action    API action.
+     * @param  object $args      API arguments.
+     * @return mixed  Modified (or unchanged) response.
      */
     public function pluginsApi($response, $action, $args)
     {
+        if ('plugin_information' !== $action || !isset($args->slug)) {
+            return $response;
+        }
+
         $proPlugins = get_site_transient('aarambha_ds_plugins');
-        $theme = aarambha_ds_get_theme();
+        $theme      = aarambha_ds_get_theme();
 
-        if ('plugin_information' === $action && isset($args->slug)) {
-            $slug = $args->slug;
+        // Guard: transient may not exist yet, or may not have a plugins property.
+        if (
+            !$proPlugins ||
+            !is_object($proPlugins) ||
+            empty($proPlugins->plugins) ||
+            !is_array($proPlugins->plugins)
+        ) {
+            return $response;
+        }
 
-            foreach ($proPlugins->plugins as $plugin) {
+        foreach ($proPlugins->plugins as $plugin) {
+            if ($plugin->slug === $args->slug) {
+                $slug = $plugin->slug;
                 $demo = $plugin->demo;
 
-                if ($plugin->slug === $args->slug) {
-                    $response                 = new stdClass();
-                    $response->id             = str_replace('-', '_', $plugin->slug);
-                    $response->slug           = $plugin->slug;
-                    $response->plugin_name    = $plugin->name;
-                    $response->name           = $plugin->name;
-                    $response->new_version    = $plugin->version;
-                    $response->download_link  = Aarambha_DS()->api()->download(
-                        compact('theme', 'slug', 'demo')
-                    );
-                }
+                $response                = new stdClass();
+                $response->id            = str_replace('-', '_', $slug);
+                $response->slug          = $slug;
+                $response->plugin_name   = $plugin->name;
+                $response->name          = $plugin->name;
+                $response->new_version   = $plugin->version;
+                $response->download_link = Aarambha_DS()->api()->download(
+                    compact('theme', 'slug', 'demo')
+                );
+
+                break;
             }
         }
 

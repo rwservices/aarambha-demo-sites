@@ -364,6 +364,7 @@ class Aarambha_DS_Admin
                         'We cannot import now. Please try again later!',
                         'aarambha-demo-sites'
                     ),
+                    'ajaxUrl'        => admin_url('admin-ajax.php'),
                     'tryAgain'       => esc_html__(
                         'Refresh the page, and try again!',
                         'aarambha-demo-sites'

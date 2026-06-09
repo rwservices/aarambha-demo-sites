@@ -1,29 +1,25 @@
 <?php
 
-
-
 /**
  * Aarambha Demo Sites Core.
  *
- * This class handles few things.
+ * This class handles:
  * 1. Downloads the required demo files.
- * 2. Imports Content
- * 3. Imports Customizer Informations.
+ * 2. Imports Content (using official WP_Import via Aarambha_WP_Import)
+ * 3. Imports Customizer settings.
  * 4. Imports Widgets.
- * 5. Sets up pages.
- * 6. Finalizes the Import Process.
+ * 5. Imports Sliders.
+ * 6. Sets up navigation menus.
  *
  * @since 1.0.0
  */
+
 if (!defined('WPINC')) {
-    exit;    // Exit if accessed directly.
+    exit;
 }
 
-
 /**
- * Class:: Aarambha_DS_Core.
- *
- * Content Importer.
+ * Class Aarambha_DS_Core
  */
 class Aarambha_DS_Core
 {
@@ -31,149 +27,69 @@ class Aarambha_DS_Core
      * Single class instance.
      *
      * @since 1.0.0
-     *
-     * @var object
+     * @var Aarambha_DS_Core|null
      */
     private static $instance = null;
 
     /**
-     * Records the time.
-     *
-     * @since 1.0.0
-     *
-     * @var object
-     */
-    private $microtime;
-
-    /**
-     * Stores the request instance to prevent failure of nonce validation
-     * @provide the complete request object for AJAX.
-     */
-    protected $request = [];
-
-    /**
      * Ensures only one instance of this class is available.
      *
-
-     *
-     * @version 1.0.0
-     *
-     * @since 1.0.0
-     *
-     * @return object Aarambha_DS_Core
+     * @return Aarambha_DS_Core
      */
     public static function getInstance()
     {
         if (null === self::$instance) {
             self::$instance = new self();
         }
-
         return self::$instance;
     }
 
-    /**
-     * A dummy constructor to prevent this class from being loaded more than once.
-     *
-     * @see Aarambha_DS_Core::getInstance()
-     * @since 1.0.0
-     * @codeCoverageIgnore
-     */
-    private function __construct()
-    {
-        /* We do nothing here! */
-    }
+    private function __construct() {}
 
-    /**
-     * You cannot clone this class.
-     *
-     * @since 1.0.0
-     * @codeCoverageIgnore
-     */
     public function __clone()
     {
-        _doing_it_wrong(
-            __FUNCTION__,
-            esc_html__('Cheatin&#8217; huh?', 'aarambha-demo-sites'),
-            '1.0.0'
-        );
+        _doing_it_wrong(__FUNCTION__, esc_html__('Cheatin&#8217; huh?', 'aarambha-demo-sites'), '1.0.0');
     }
 
-    /**
-     * You cannot unserialize instance of this class.
-     *
-     * @since 1.0.0
-     * @codeCoverageIgnore
-     */
     public function __wakeup()
     {
-        _doing_it_wrong(
-            __FUNCTION__,
-            esc_html__('Cheatin&#8217; huh?', 'aarambha-demo-sites'),
-            '1.0.0'
-        );
+        _doing_it_wrong(__FUNCTION__, esc_html__('Cheatin&#8217; huh?', 'aarambha-demo-sites'), '1.0.0');
     }
 
-    /**
-     * Inject the importer where required.
-     */
-    private function injectImporter()
-    {
-        if (! defined('WP_LOAD_IMPORTERS')) {
-            define('WP_LOAD_IMPORTERS', true);
-        }
-
-        // Load Importer API.
-        require_once ABSPATH . 'wp-admin/includes/import.php';
-
-        if (! class_exists('WP_Importer')) {
-            $class_wp_importer = ABSPATH . 'wp-admin/includes/class-wp-importer.php';
-
-            if (file_exists($class_wp_importer)) {
-                require $class_wp_importer;
-            }
-        }
-
-        // Include WXR Importer.
-        require dirname(__FILE__) . '/wordpress-importer/class-wp-import.php';
-    }
+    // -------------------------------------------------------------------------
+    // Preparation
+    // -------------------------------------------------------------------------
 
     /**
-     * Prepares the import.
+     * Prepares the import: creates the demo directory and downloads all files.
      *
-     * @param array Demo
-     *
-     * @return bool
+     * @param  array  $demo Demo data array from the API.
+     * @return array  Map of file-type keys to downloaded filenames.
      */
     public function prepare($demo)
     {
-        $slug = $demo['slug'];
-
-        $dir = $this->createDir($slug);
-
+        $slug  = $demo['slug'];
+        $dir   = $this->createDir($slug);
         $files = $this->download($demo, $dir);
 
         return $files;
     }
 
     /**
-     * Creates the directory.
-     * 
-     * @param string $slug.
+     * Creates the directory that will hold the demo's import files.
+     *
+     * @param  string $slug Demo slug.
+     * @return string Absolute path to the directory.
      */
     public function createDir($slug)
     {
-        $dir = aarambha_ds_get_custom_uploads_dir();
-        $path  = "{$dir}/$slug";
+        $base = aarambha_ds_get_custom_uploads_dir();
+        $path = "{$base}/{$slug}";
 
         if (!file_exists($path)) {
             $result = wp_mkdir_p(trailingslashit($path));
-            
-            // Log error if directory creation failed
             if (!$result) {
-                error_log(sprintf(
-                    '[Aarambha DS] Failed to create directory: %s (Check file permissions)',
-                    $path
-                ));
+                error_log(sprintf('[Aarambha DS] Failed to create directory: %s', $path));
             }
         }
 
@@ -181,20 +97,18 @@ class Aarambha_DS_Core
     }
 
     /**
-     * Downloads the file.
-     * 
-     * @param array $files  List of files to be downloaded.
-     * @param string $dir   Download path for the files.
-     * 
-     * @return array Files downloaded & written.
+     * Downloads all demo files declared in $demo['files'].
+     *
+     * @param  array  $demo Demo data array.
+     * @param  string $dir  Absolute path to the target directory.
+     * @return array  Map of file-type keys to filenames that were successfully written.
      */
     public function download($demo, $dir)
     {
-        $name = $demo['slug'];
-
-        $args = [];
-        $args['theme'] = (isset($demo['theme'])) ? $demo['theme'] : 'neostore';
-        $args['demo'] = $name;
+        $args = [
+            'theme' => $demo['theme'] ?? 'neostore',
+            'demo'  => $demo['slug'],
+        ];
 
         if (!function_exists('download_url')) {
             require_once ABSPATH . 'wp-admin/includes/file.php';
@@ -202,125 +116,21 @@ class Aarambha_DS_Core
 
         $files = [];
 
-        if (isset($demo['files'])) {
+        if (empty($demo['files'])) {
+            return $files;
+        }
 
-            foreach ($demo['files'] as $key => $file) {
+        foreach ($demo['files'] as $key => $file) {
+            if (empty($file)) {
+                continue;
+            }
 
-                if (empty($file)) {
-                    continue;
+            if (is_array($file)) {
+                foreach ($file as $filename) {
+                    $this->processSingleFile($filename['file'], $dir, $args, $files, $key);
                 }
-
-                if (is_array($file)) {
-                    foreach ($file as $filename) {
-                        $name = $filename['file'];
-
-                        $file_name = "{$dir}/{$name}";
-
-                        $args['file'] = $name;
-                        $url = Aarambha_DS()->api()->downloadUrl($args, $dir);
-
-                        // Download the file.
-                        $download = download_url($url);
-
-                        // Check if download was successful (no WP_Error)
-                        if (is_wp_error($download)) {
-                            error_log(sprintf(
-                                '[Aarambha DS] Failed to download file %s: %s',
-                                $name,
-                                $download->get_error_message()
-                            ));
-                            continue;
-                        }
-
-                        // Get the file content.
-                        $content = file_get_contents($download); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_get_contents
-
-                        if ($content === false) {
-                            error_log(sprintf(
-                                '[Aarambha DS] Failed to read downloaded file: %s',
-                                $name
-                            ));
-                            continue;
-                        }
-
-                        $file_handle = fopen($file_name, 'w'); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
-
-                        if ($file_handle) {
-                            $write_result = fwrite($file_handle, $content); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fwrite
-                            fclose($file_handle); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fclose
-
-                            if ($write_result === false) {
-                                error_log(sprintf(
-                                    '[Aarambha DS] Failed to write file: %s',
-                                    $file_name
-                                ));
-                            } else {
-                                $files[$key] = $file;
-                            }
-                        } else {
-                            error_log(sprintf(
-                                '[Aarambha DS] Cannot open file for writing: %s (Check permissions)',
-                                $file_name
-                            ));
-                        }
-                    }
-                } else {
-                    $file_name = "{$dir}/$file";
-
-                    // Check if file exists.
-                    if (file_exists($file_name)) {
-                        $files[$key] = $file;
-                        continue;
-                    }
-
-                    $args['file'] = $file;
-                    $url = Aarambha_DS()->api()->downloadUrl($args, $dir);
-
-                    // Download the file.
-                    $download = download_url($url);
-
-                    // Check if download was successful (no WP_Error)
-                    if (is_wp_error($download)) {
-                        error_log(sprintf(
-                            '[Aarambha DS] Failed to download file %s: %s',
-                            $file,
-                            $download->get_error_message()
-                        ));
-                        continue;
-                    }
-
-                    // Get the file content.
-                    $content = file_get_contents($download); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_get_contents
-
-                    if ($content === false) {
-                        error_log(sprintf(
-                            '[Aarambha DS] Failed to read downloaded file: %s',
-                            $file
-                        ));
-                        continue;
-                    }
-
-                    $file_handle = fopen($file_name, 'w'); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
-
-                    if ($file_handle) {
-                        $write_result = fwrite($file_handle, $content); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fwrite
-                        fclose($file_handle); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fclose
-
-                        if ($write_result === false) {
-                            error_log(sprintf(
-                                '[Aarambha DS] Failed to write file: %s',
-                                $file_name
-                            ));
-                        } else {
-                            $files[$key] = $file;
-                        }
-                    } else {
-                        error_log(sprintf(
-                            '[Aarambha DS] Cannot open file for writing: %s (Check permissions)',
-                            $file_name
-                        ));
-                    }
-                }
+            } else {
+                $this->processSingleFile($file, $dir, $args, $files, $key);
             }
         }
 
@@ -328,157 +138,191 @@ class Aarambha_DS_Core
     }
 
     /**
-     * Begin the import process.
-     * 
-     * @return bool
+     * Downloads and saves a single file to disk.
+     *
+     * @param string $filename Base filename to download.
+     * @param string $dir      Absolute path to the target directory.
+     * @param array  $args     Query args passed to the download URL builder.
+     * @param array  &$files   Reference to the collected files map.
+     * @param string $key      File-type key (e.g. 'content', 'customizer').
      */
-    /**
-     * Begin the import process.
-     * 
-     * @param string $file Path to the WXR file
-     * @param array $req Request parameters
-     * @return array|bool
-     */
-    public function content($file, $req = [])
+    private function processSingleFile($filename, $dir, $args, &$files, $key)
     {
-        $this->injectImporter();
+        $file_name = "{$dir}/{$filename}";
 
-        if (!empty($req)) {
-            $this->request = $req;
+        // Skip if already downloaded.
+        if (file_exists($file_name)) {
+            $files[$key] = $filename;
+            return;
         }
 
-        $wp_import = new Aarambha_DS_WP_Importer();
-        $wp_import->fetch_attachments = true;
+        $args['file'] = $filename;
+        $url          = Aarambha_DS()->api()->downloadUrl($args);
+        $download     = download_url($url);
 
-        // Add error handler to catch WordPress errors
-        add_action('import_start', function () {
-            set_error_handler(function ($errno, $errstr, $errfile, $errline) {
-                throw new ErrorException($errstr, $errno, 0, $errfile, $errline);
-            });
-        });
+        if (is_wp_error($download)) {
+            error_log(sprintf('[Aarambha DS] Failed to download %s: %s', $filename, $download->get_error_message()));
+            return;
+        }
 
-        add_action('import_end', function () {
-            restore_error_handler();
-        });
+        $content = file_get_contents($download);
+
+        // Clean up the temp file WordPress created.
+        @unlink($download);
+
+        if (false === $content) {
+            error_log(sprintf('[Aarambha DS] Failed to read downloaded file for: %s', $filename));
+            return;
+        }
+
+        $file_handle = fopen($file_name, 'w');
+        if ($file_handle) {
+            if (fwrite($file_handle, $content) !== false) {
+                $files[$key] = $filename;
+            }
+            fclose($file_handle);
+        } else {
+            error_log(sprintf('[Aarambha DS] Failed to open file for writing: %s', $file_name));
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Import steps
+    // -------------------------------------------------------------------------
+
+    /**
+     * Imports WordPress content from a WXR file.
+     *
+     * @param  string $file Absolute path to the WXR (.xml) file.
+     * @return array  Result array with 'action' and 'message' keys.
+     */
+    public function content($file)
+    {
+        // Obtain a fresh WP importer instance from the main plugin class.
+        $importer = Aarambha_DS()->importer();
+
+        if (!$importer) {
+            return [
+                'action'  => 'terminate',
+                'message' => esc_html__('WordPress Importer plugin is required but not available.', 'aarambha-demo-sites'),
+            ];
+        }
+
+        // Verify the file exists before attempting import.
+        if (empty($file) || !file_exists($file)) {
+            return [
+                'action'  => 'terminate',
+                'message' => sprintf(
+                    /* translators: %s: file path */
+                    esc_html__('Import file not found: %s', 'aarambha-demo-sites'),
+                    esc_html($file)
+                ),
+                'file'    => $file,
+            ];
+        }
 
         try {
-            ob_start();
+            $importer->fetch_attachments = true;
 
-            // Prepare options for the import
-            $options = [
-                'rewrite_urls' => isset($req['rewrite_urls']) ? (bool) $req['rewrite_urls'] : true
-            ];
+            do_action('aarambha_ds_before_content_import', $file, $importer);
 
-            // Call import with the file path and options array
-            $wp_import->import($file, $options);
+            $result = $importer->import($file);
 
-            $output = ob_get_clean();
+            do_action('aarambha_ds_after_content_import', $importer);
 
-            // Check if import was successful by looking for error messages in output
-            if (strpos($output, 'error') !== false || strpos($output, 'Failed') !== false) {
+            // parent::import() may return a WP_Error or boolean. Treat non-falsey as success.
+            if (is_wp_error($result)) {
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log(sprintf('[Aarambha DS] WP_Import returned error for file %s: %s', $file, $result->get_error_message()));
+                }
+
                 return [
-                    'action' => 'terminate',
-                    'message' => esc_html__('Import failed. Please check the WXR file and try again.', 'aarambha-demo-sites')
+                    'action'  => 'terminate',
+                    'message' => $result->get_error_message(),
+                    'file'    => $file,
                 ];
             }
 
-            // Success - continue to next step
-            $response = [
-                'message'    => esc_html__('Importing Options', 'aarambha-demo-sites'),
-                'action'     => 'import-customize',
+            // Gather processed counts when available for debugging.
+            $posts_count = method_exists($importer, 'get_processed_posts') ? count($importer->get_processed_posts()) : 0;
+            $terms_count = method_exists($importer, 'get_processed_terms') ? count($importer->get_processed_terms()) : 0;
+
+            return [
+                'action'                => 'import-customize',
+                'message'               => esc_html__('Content imported successfully.', 'aarambha-demo-sites'),
+                'file'                  => $file,
+                'processed_posts_count' => $posts_count,
+                'processed_terms_count' => $terms_count,
             ];
 
-            return $response;
         } catch (Exception $e) {
-            ob_end_clean();
-            restore_error_handler();
             return [
-                'action' => 'terminate',
-                'message' => $e->getMessage()
-            ];
-        } catch (Error $e) {
-            ob_end_clean();
-            restore_error_handler();
-            return [
-                'action' => 'terminate',
-                'message' => $e->getMessage()
+                'action'  => 'terminate',
+                'message' => $e->getMessage(),
             ];
         }
     }
 
+    /**
+     * Imports Customizer settings from a JSON file.
+     *
+     * @param  string $import_file Absolute path to the customizer export file.
+     * @return true
+     */
     public function customizer($import_file)
     {
-        // Include WXR Importer.
-        require dirname(__FILE__) . '/customize/class-aarambha-ds-customize-importer.php';
-
-        $results = Aarambha_DS_Customize_Importer::import($import_file);
-
+        require_once dirname(__FILE__) . '/customize/class-aarambha-ds-customize-importer.php';
+        Aarambha_DS_Customize_Importer::import($import_file);
         return true;
     }
 
     /**
-     * Import the widget.
-     * 
-     * @return bool
+     * Imports widget data from a JSON file.
+     *
+     * @param  string $import_file Absolute path to the widgets export file.
+     * @return true
      */
     public function widgets($import_file)
     {
-        // Include WXR Importer.
-        require dirname(__FILE__) . '/class-aarambha-ds-widget-importer.php';
-
-        $results = Aarambha_DS_Widget_Importer::import($import_file);
-
+        require_once dirname(__FILE__) . '/class-aarambha-ds-widget-importer.php';
+        Aarambha_DS_Widget_Importer::import($import_file);
         return true;
     }
 
     /**
-     * Import the slider datas.
-     * 
-     * @return bool.
+     * Imports a Smart Slider 3 slider from a file.
+     *
+     * @param  string $file Absolute path to the slider file.
+     * @return true
      */
     public function slider($file)
     {
-        // Smart Slider plugin is inactive.
         if (!class_exists('SmartSlider3')) {
             return true;
         }
 
         SmartSlider3::import($file);
-
         return true;
     }
 
     /**
-     * Setup pages.
-     * 
-     * @return bool.
-     */
-    public function setupPages($pages)
-    {
-
-
-        return true;
-    }
-
-    /**
-     * Setup menu navigation.
-     * 
-     * @return bool.
+     * Assigns imported menus to the theme's registered nav-menu locations.
+     *
+     * @param  array $navigations Map of location slug => menu name.
+     * @return true
      */
     public function setupNavigation($navigations)
     {
-        $locations = get_theme_mod('nav_menu_locations');
+        $locations = get_theme_mod('nav_menu_locations', []);
 
-        foreach ($navigations as $key => $value) {
-            $menu = get_term_by('name', $value, 'nav_menu');
-
-            if (isset($menu->term_id)) {
-                $locations[$key] = $menu->term_id;
+        foreach ($navigations as $location => $menu_name) {
+            $menu = get_term_by('name', $menu_name, 'nav_menu');
+            if ($menu && isset($menu->term_id)) {
+                $locations[$location] = $menu->term_id;
             }
         }
 
         set_theme_mod('nav_menu_locations', $locations);
-
         return true;
     }
 }
