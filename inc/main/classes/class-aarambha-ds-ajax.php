@@ -705,8 +705,9 @@ class Aarambha_DS_Ajax
     {
         $this->startBuffer();
 
-        // Nonce created in the previous step as "import-finalize-import"
-        $this->verifyNonce($_REQUEST['nonce'], 'import-finalize-import');
+        // Nonce was created in the previous step as wp_create_nonce("import-finalize")
+        // because $nextStep = "finalize" (the short step name, no "-import" suffix).
+        $this->verifyNonce($_REQUEST['nonce'], 'import-finalize');
 
         if (function_exists('WC')) {
             $this->completeWooCommerceWizard();
