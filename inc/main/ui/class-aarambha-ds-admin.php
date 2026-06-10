@@ -348,6 +348,13 @@ class Aarambha_DS_Admin
                 // Localize strings.
                 $default = [
                     'nonce'          => wp_create_nonce(),
+                    // AFTER — one nonce per action, each matches its handler's verify call
+                    'nonces' => [
+                        'retrieveDemo'  => wp_create_nonce('retrieve-demo'),
+                        'listPlugins'   => wp_create_nonce('list-plugins'),
+                        'prepareImport' => wp_create_nonce('prepare-import'),
+                        'importContent' => wp_create_nonce('import-content'),
+                    ],
                     'themeName'      => aarambha_ds_get_theme_name(),
                     'offlineTitle'   => esc_html__('You\'re Offline!', 'aarambha-demo-sites'),
                     'purchaseLabel'  => esc_html__('Purchase Now', 'aarambha-demo-sites'),

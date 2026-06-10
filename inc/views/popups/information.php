@@ -37,7 +37,7 @@
                             href="#" 
                             class="button-main button-large button-rounded aarambha-ds--action__list" 
                             data-action="list-plugins" 
-                            data-nonce="<?php echo esc_attr( wp_create_nonce('list-plugins') ); ?>"
+                            data-nonce="<# print( aarambhaDSData.nonces.listPlugins ) #>"
                             data-target="install-demo--body__progress"
                             data-slug="{{ data.slug }}">
                             Continue

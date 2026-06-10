@@ -264,15 +264,26 @@ class Aarambha_DS_Core
     }
 
     /**
-     * Imports Customizer settings from a JSON file.
+     * Imports Customizer settings from a .dat / export file.
+     *
+     * FIX: Previously discarded the return value of
+     * Aarambha_DS_Customize_Importer::import(), so a WP_Error (e.g. bad file
+     * format, missing keys) was silently swallowed and the AJAX handler had no
+     * way to detect the failure. Now we return the WP_Error (or true on
+     * success) so the caller can act on it.
      *
      * @param  string $import_file Absolute path to the customizer export file.
-     * @return true
+     * @return true|WP_Error
      */
     public function customizer($import_file)
     {
         require_once dirname(__FILE__) . '/customize/class-aarambha-ds-customize-importer.php';
-        Aarambha_DS_Customize_Importer::import($import_file);
+        $result = Aarambha_DS_Customize_Importer::import($import_file);
+
+        if (is_wp_error($result)) {
+            return $result;
+        }
+
         return true;
     }
 

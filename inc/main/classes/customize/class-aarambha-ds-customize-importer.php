@@ -19,19 +19,30 @@ class Aarambha_DS_Customize_Importer {
 	 * Imports uploaded mods and calls WordPress core customize_save actions so
 	 * themes that hook into them can act before mods are saved to the database.
 	 *
-	 * Update: WP core customize_save actions were removed, because of some errors.
-	 *
 	 * @param  string $import_file Path to the import file.
 	 * @return void|WP_Error
 	 */
 	public static function import( $import_file ) {
 		global $wp_customize;
 
+		// Verify the import file exists and is readable.
+		if ( empty( $import_file ) || ! file_exists( $import_file ) || ! is_readable( $import_file ) ) {
+			return new WP_Error(
+				'aarambha_ds_customizer_import_file_error',
+				__( 'The customizer import file does not exist or is not readable.', 'aarambha-demo-sites' )
+			);
+		}
+
 		$data = maybe_unserialize( file_get_contents( $import_file ) );
 
 		// Data checks.
-		if ( ! is_array( $data ) && ( ! isset( $data['template'] ) || ! isset( $data['mods'] ) ) ) {
-			return new WP_Error( 'aarambha_ds_customizer_import_data_error', __( 'The customizer import file is not in a correct format. Please make sure to use the correct customizer import file.', 'aarambha-demo-sites' ) );
+		// Fix: was using && which meant validation was skipped when $data was an array.
+		// Must use || so we bail if NOT an array OR if required keys are missing.
+		if ( ! is_array( $data ) || ( ! isset( $data['template'] ) || ! isset( $data['mods'] ) ) ) {
+			return new WP_Error(
+				'aarambha_ds_customizer_import_data_error',
+				__( 'The customizer import file is not in a correct format. Please make sure to use the correct customizer import file.', 'aarambha-demo-sites' )
+			);
 		}
 
 		// Import Images.
@@ -45,13 +56,23 @@ class Aarambha_DS_Customize_Importer {
 		// Import custom options.
 		if ( isset( $data['options'] ) ) {
 
+			// Fix: $wp_customize is null when this runs outside a live Customizer
+			// request (e.g. during AJAX demo import). Bootstrap the manager so
+			// WP_Customize_Setting::update() can write option values correctly.
+			if ( ! ( $wp_customize instanceof WP_Customize_Manager ) ) {
+				require_once ABSPATH . WPINC . '/class-wp-customize-manager.php';
+				$wp_customize = new WP_Customize_Manager();
+			}
+
 			// Load WordPress Customize Setting Class.
 			if ( ! class_exists( 'WP_Customize_Setting' ) ) {
 				require_once ABSPATH . WPINC . '/class-wp-customize-setting.php';
 			}
 
 			// Include Customizer Demo Importer Setting class.
-			require dirname( __FILE__ ) . '/class-aarambha-ds-customize-importer-setting.php';
+			if ( ! class_exists( 'Aarambha_DS_Customize_Importer_Setting' ) ) {
+				require_once dirname( __FILE__ ) . '/class-aarambha-ds-customize-importer-setting.php';
+			}
 
 			foreach ( $data['options'] as $option_key => $option_value ) {
 				$option = new Aarambha_DS_Customize_Importer_Setting(
@@ -139,8 +160,13 @@ class Aarambha_DS_Customize_Importer {
 		if ( ! empty( $file ) ) {
 			// Set variables for storage, fix file filename for query strings.
 			preg_match( '/[^\?]+\.(jpe?g|jpe|gif|png)\b/i', $file, $matches );
-			$file_array         = array();
-			$file_array['name'] = basename( $matches[0] );
+
+			if ( empty( $matches ) ) {
+				return new WP_Error( 'aarambha_ds_image_url_error', __( 'Could not parse image URL.', 'aarambha-demo-sites' ) );
+			}
+
+			$file_array             = array();
+			$file_array['name']     = basename( $matches[0] );
 
 			// Download file to temp location.
 			$file_array['tmp_name'] = download_url( $file );
@@ -164,8 +190,8 @@ class Aarambha_DS_Customize_Importer {
 			$data->attachment_id = $id;
 			$data->url           = wp_get_attachment_url( $id );
 			$data->thumbnail_url = wp_get_attachment_thumb_url( $id );
-			$data->height        = $meta['height'];
-			$data->width         = $meta['width'];
+			$data->height        = isset( $meta['height'] ) ? $meta['height'] : 0;
+			$data->width         = isset( $meta['width'] ) ? $meta['width'] : 0;
 		}
 
 		return $data;
