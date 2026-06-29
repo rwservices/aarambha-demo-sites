@@ -41,39 +41,33 @@ final class Aarambha_DS
     private $apiUrl = '';
 
     /**
-     * Admin page arugments.
+     * Admin page arguments.
      * 
      * @since 1.0.0
      * @access private
      * 
-     * @var string
+     * @var array
      */
     private $adminPageArgs = [];
 
     /**
-     * Should display admin page?
-     * 
+     * Whether the WordPress Importer plugin is available.
+     *
      * @since 1.0.0
      * @access private
-     * 
-     * @var boolean
+     *
+     * @var bool
      */
-    private $displayPanel = true;
+    private $hasWpImporter = false;
 
     /**
      * Main Aarambha_DS Instance
      *
      * Ensures only one instance of this class exists in memory at any one time.
      *
-     * @see Aarambha_DS()
-     * @uses Aarambha_DS::init_globals() Setup class globals.
-     * @uses Aarambha_DS::init_includes() Include required files.
-     * @uses Aarambha_DS::init_actions() Setup hooks and actions.
-     *
      * @since 1.0.0
      * @static
-     * @return Aarambha_DS.
-     * @codeCoverageIgnore
+     * @return Aarambha_DS
      */
     public static function getInstance()
     {
@@ -91,11 +85,8 @@ final class Aarambha_DS
     /**
      * A dummy constructor to prevent this class from being loaded more than once.
      *
-     * @see Aarambha_DS::getInstance()
-     *
      * @since 1.0.0
      * @access private
-     * @codeCoverageIgnore
      */
     private function __construct()
     {
@@ -106,7 +97,6 @@ final class Aarambha_DS
      * You cannot clone this class.
      *
      * @since 1.0.0
-     * @codeCoverageIgnore
      */
     public function __clone()
     {
@@ -117,7 +107,6 @@ final class Aarambha_DS
      * You cannot unserialize instances of this class.
      *
      * @since 1.0.0
-     * @codeCoverageIgnore
      */
     public function __wakeup()
     {
@@ -129,13 +118,11 @@ final class Aarambha_DS
      */
     private function initGlobals()
     {
-
         $default_url = AARAMBHA_DS_API_URL;
-
         $url  = apply_filters('aarambha_ds_api_url', $default_url);
 
         $args = apply_filters('aarambha_ds_admin_page_args', [
-            'menu_type' => 'menu',   // menu | submenu,
+            'menu_type' => 'menu',
             'slug'      => 'aarambha-ds',
             'menu_name' => esc_html__('Import Demo', 'aarambha-demo-sites'),
             'title'     => esc_html__('Import Demo', 'aarambha-demo-sites'),
@@ -144,50 +131,91 @@ final class Aarambha_DS
             'position'  => 90,
         ]);
 
-        $this->apiUrl = $url;
-
+        $this->apiUrl        = $url;
         $this->adminPageArgs = $args;
     }
 
     /**
-     * Loads our all the core files.
+     * Loads all the core files.
      */
     private function includeCoreFiles()
     {
-        /* Include core classes */
         require_once AARAMBHA_DS_CLASSES . 'class-aarambha-ds-api.php';
-
         require_once AARAMBHA_DS_CLASSES . 'class-aarambha-ds-ajax.php';
-
         require_once AARAMBHA_DS_CLASSES . 'class-aarambha-ds-plugins.php';
         require_once AARAMBHA_DS_CLASSES . 'class-aarambha-ds-core.php';
 
-        /* Include admin ui */
+        /* Include admin UI */
         require_once AARAMBHA_DS_UI . 'class-aarambha-ds-admin.php';
+
+        // Load official WordPress Importer safely.
+        $this->loadWordPressImporter();
+    }
+
+    /**
+     * Attempt to load the WordPress Importer plugin class.
+     */
+    private function loadWordPressImporter()
+    {
+        // Define WP_LOAD_IMPORTERS if not already set, so the importer plugin doesn't early-return.
+        if (!defined('WP_LOAD_IMPORTERS')) {
+            define('WP_LOAD_IMPORTERS', true);
+        }
+
+        if (class_exists('WP_Import')) {
+            $this->hasWpImporter = true;
+            return;
+        }
+
+        $importer_plugin = 'wordpress-importer/wordpress-importer.php';
+
+        // Check if the importer plugin is available.
+        if (!function_exists('is_plugin_active')) {
+            require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
+
+        if (!is_plugin_active($importer_plugin)) {
+            return;
+        }
+
+        // Load base WP_Importer class if it doesn't exist.
+        if (!class_exists('WP_Importer')) {
+            $base_importer = ABSPATH . 'wp-admin/includes/class-wp-importer.php';
+            if (file_exists($base_importer)) {
+                require_once $base_importer;
+            }
+        }
+
+        $plugin_base = WP_PLUGIN_DIR . '/wordpress-importer';
+
+        // Load parser files BEFORE loading class-wp-import.php so WXR_Parser is available.
+        $parsers_file = $plugin_base . '/parsers.php';
+        if (file_exists($parsers_file)) {
+            require_once $parsers_file;
+        }
+
+        // Now load the importer class.
+        $class_file = $plugin_base . '/class-wp-import.php';
+        if (file_exists($class_file)) {
+            require_once $class_file;
+            $this->hasWpImporter = class_exists('WP_Import');
+        }
     }
 
     /**
      * Fires the actions & filters.
      * 
      * @since 1.0.0
-     * @return void
      */
     private function runActions()
     {
-        // Load the textdomain first at init.
-        add_action('init', [$this, 'loadTextdomain']);
-
-        // Hook ajax and plugins_loaded after textdomain is available.
+        add_action('init',           [$this, 'loadTextdomain']);
         add_action('plugins_loaded', [$this, 'pluginsLoaded']);
-
-        // Register AJAX handlers at init so translations are loaded first.
-        add_action('init', [$this, 'ajax']);
+        add_action('init',           [$this, 'ajax']);
     }
 
     /**
      * Make plugin available for translation.
-     * 
-     * @return void
      */
     public function loadTextdomain()
     {
@@ -199,8 +227,7 @@ final class Aarambha_DS
      */
     public function pluginsLoaded()
     {
-        $activeTheme = aarambha_ds_get_theme();
-
+        $activeTheme  = aarambha_ds_get_theme();
         $authorThemes = get_site_transient('aarambha_ds_author_themes');
 
         if (!$authorThemes) {
@@ -216,49 +243,46 @@ final class Aarambha_DS
             $this->admin();
         }
 
-        // For testing purpose.
+        // For testing purposes — remove in production if not needed.
         $this->admin();
     }
 
     /**
-     * Displays the admin notice.
+     * Displays the admin notice when theme is incompatible.
      */
     public function aarambha_ds_print_admin_notice()
     {
-        $class = 'notice notice-error is-dismissible';
-
-        echo sprintf('<div class="%s">', $class);
         echo sprintf(
-            __('<p>You need to have one of the themes from <a href="%1$s" target="_blank">%2$s</a> installed, to use <strong>%3$s</strong> plugin</p>', 'aarambha-demo-sites'),
-            esc_url(AARAMBHA_DS_AUTHOR_URI),
-            ucfirst(AARAMBHA_DS_AUTHOR),
-            AARAMBHA_DS_PLUGIN_NAME
+            '<div class="notice notice-error is-dismissible"><p>%s</p></div>',
+            sprintf(
+                /* translators: 1: author URL, 2: author name, 3: plugin name */
+                __('You need to have one of the themes from <a href="%1$s" target="_blank">%2$s</a> installed to use <strong>%3$s</strong> plugin', 'aarambha-demo-sites'),
+                esc_url(AARAMBHA_DS_AUTHOR_URI),
+                ucfirst(AARAMBHA_DS_AUTHOR),
+                AARAMBHA_DS_PLUGIN_NAME
+            )
         );
-        echo '</div>';
     }
 
     /**
-     * Includes the file.
-     * 
-     * Generally used for view generation along with data.
+     * Includes a view file with optional data.
      *
      * @since 1.0.0
-     * @return void
      */
     public function view($view, $data = [])
     {
         try {
             include AARAMBHA_DS_VIEWS . "{$view}.php";
         } catch (Exception $e) {
-            echo $e->getMessage();
+            echo esc_html($e->getMessage());
         }
     }
 
     /**
-     * AarambhaThemes API class.
+     * Returns the API class instance.
      * 
      * @since 1.0.0
-     * @return object Aarambha_DS_API
+     * @return Aarambha_DS_API
      */
     public function api()
     {
@@ -266,19 +290,30 @@ final class Aarambha_DS
     }
 
     /**
-     * AarambhaThemes Helper Class
+     * Returns the Plugins helper class instance.
+     *
+     * @return Aarambha_DS_Plugins
      */
     public function plugins()
     {
         return Aarambha_DS_Plugins::getInstance();
     }
 
+    /**
+     * Returns the Core importer class instance.
+     * This is the class that performs content/customizer/widget/slider imports.
+     *
+     * @return Aarambha_DS_Core
+     */
+    public function core()
+    {
+        return Aarambha_DS_Core::getInstance();
+    }
 
     /**
-     * AarambhaThemes AJAX class.
+     * Initialises the AJAX handler.
      * 
      * @since 1.0.0
-     * @return void
      */
     public function ajax()
     {
@@ -286,11 +321,9 @@ final class Aarambha_DS
     }
 
     /**
-     * Generates the Admin pages and UI for the importer
+     * Generates the Admin pages and UI for the importer.
      * 
      * @since 1.0.0
-     * 
-     * @return void
      */
     public function admin()
     {
@@ -298,7 +331,9 @@ final class Aarambha_DS
     }
 
     /**
-     * Get the api URL.
+     * Returns the raw API URL.
+     *
+     * @return string
      */
     public function getApiUrl()
     {
@@ -306,30 +341,27 @@ final class Aarambha_DS
     }
 
     /**
-     * Get the admin page url.
+     * Returns the full URL to the plugin's admin page.
      * 
      * @return string
      */
     public function getPageUrl()
     {
-        $args = $this->adminPageArgs;
-
+        $args     = $this->adminPageArgs;
         $menuType = $args['menu_type'];
         $slug     = $args['slug'];
         $parent   = 'admin.php';
 
-        if ('submenu' == $menuType) {
+        if ('submenu' === $menuType) {
             $parent = sanitize_text_field($args['parent']);
         }
 
-        $url = admin_url($parent);
-
-        return add_query_arg(['page' => sanitize_key($slug)], $url);
+        return add_query_arg(['page' => sanitize_key($slug)], admin_url($parent));
     }
 
     /**
-     * Get thee admin menu slug.
-     * 
+     * Returns the admin page arguments array.
+     *
      * @return array
      */
     public function getAdminPageArgs()
@@ -338,7 +370,7 @@ final class Aarambha_DS
     }
 
     /**
-     * Get the admin page slug.
+     * Returns the admin page slug.
      * 
      * @return string
      */
@@ -347,21 +379,58 @@ final class Aarambha_DS
         return ($this->adminPageArgs)['slug'];
     }
 
-
     /**
-     * Main Content Importer.
-     * 
-     * @return Aarambha_DS_Core
+     * Returns a fresh Aarambha_WP_Import instance (the low-level WXR importer),
+     * or false when the WordPress Importer plugin is not available.
+     *
+     * Use Aarambha_DS()->core() to access higher-level import methods
+     * (content, customizer, widgets, slider, setupNavigation).
+     *
+     * @return Aarambha_WP_Import|false
      */
     public function importer()
     {
-        return Aarambha_DS_Core::getInstance();
+        if (!$this->hasWpImporter) {
+            if (current_user_can('manage_options')) {
+                add_action('admin_notices', [$this, 'importerMissingNotice']);
+            }
+            return false;
+        }
+
+        if (!class_exists('Aarambha_WP_Import')) {
+            require_once AARAMBHA_DS_CLASSES . 'class-aarambha-wp-import.php';
+        }
+
+        return new Aarambha_WP_Import();
     }
 
     /**
-     * Get the cached demo from transient.
+     * Admin notice shown when WordPress Importer plugin is missing.
+     */
+    public function importerMissingNotice()
+    {
+        echo '<div class="notice notice-error is-dismissible">
+            <p><strong>Aarambha Demo Sites</strong> requires the external
+            <a href="' . esc_url(admin_url('plugin-install.php?tab=plugin-information&plugin=wordpress-importer')) . '">WordPress Importer</a>
+            plugin to be installed and activated before demo content can be imported.</p>
+        </div>';
+    }
+
+    /**
+     * Whether the WordPress Importer plugin is available.
+     *
+     * @return bool
+     */
+    public function hasWpImporter()
+    {
+        return $this->hasWpImporter;
+    }
+
+    /**
+     * Returns the cached demo data from the transient store.
      * 
-     * @return mixed.
+     * @param  string $slug Demo slug.
+     * @return array|false  Demo data array, or false on cache miss.
      */
     public function demo($slug)
     {
@@ -369,9 +438,8 @@ final class Aarambha_DS
             return false;
         }
 
-        $theme = aarambha_ds_get_theme();
-        $key = "aarambha_ds_{$theme}_demo_{$slug}";
-
+        $theme         = aarambha_ds_get_theme();
+        $key           = "aarambha_ds_{$theme}_demo_{$slug}";
         $transientData = get_site_transient($key);
 
         if (!$transientData) {

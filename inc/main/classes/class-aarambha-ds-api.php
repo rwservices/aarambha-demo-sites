@@ -244,8 +244,11 @@ class Aarambha_DS_API
 
         $body   = $this->request($apiUrl, ['theme' => $theme]);
 
-        if (!is_wp_error($body)) {
-            return $body['data'];
+        if (!is_wp_error($body) && $body['success']) {
+            $categories = $body['data'];
+            // Cache the result for one week
+            set_site_transient('aarambha_ds_demo_categories', $categories, WEEK_IN_SECONDS);
+            return $categories;
         }
 
         return [];

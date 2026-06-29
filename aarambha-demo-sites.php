@@ -17,6 +17,7 @@
  * Author:            Aarambha Themes
  * Author URI:        https://aarambhathemes.com
  * Text Domain:       aarambha-demo-sites
+ * Requires Plugins:  wordpress-importer
  * License:           GPL v2 or later
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  */

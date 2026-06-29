@@ -15,7 +15,7 @@
 
         call: function (data) {
             return $.ajax({
-                url: ajaxurl,
+                url: (typeof aarambhaDSData !== 'undefined' && aarambhaDSData.ajaxUrl) ? aarambhaDSData.ajaxUrl : (typeof ajaxurl !== 'undefined' ? ajaxurl : ''),
                 method: 'POST',
                 data
             })
@@ -383,9 +383,12 @@
                         $(targetEl).parent('.theme').removeClass('loading')
                         aarambhaDS.ajaxlocked = false
 
+                        // FIX 3: "error" is not defined inside .done() — it only
+                        // exists in the .fail() callback. Use the server's error
+                        // fields from response.data, falling back to generic strings.
                         let tplData = {
-                            title: error,
-                            message: aarambhaDSData.failed
+                            title:   (response.data && response.data.title)   ? response.data.title   : aarambhaDSData.failedTitle,
+                            message: (response.data && response.data.message) ? response.data.message : aarambhaDSData.failed
                         }
 
                         aarambhaDSHelpers.showFailedPopup(tplData)
@@ -550,6 +553,11 @@
         prepareImport: function (event) {
             event.preventDefault()
 
+            // FIX 1: Reset the global step counter at the start of every import.
+            // Without this, a second import skips steps because stepsIndex
+            // still holds the value from the previous run.
+            stepsIndex = 0
+
             var el = event.currentTarget || event.target,
                 parent = el.parentNode,
                 nonce = el.dataset.nonce,
@@ -702,7 +710,10 @@
                     files:  response.files
                 }
 
-            if (stepsIndex > totalSteps) {
+            // FIX 2: Was ">" — must be ">=" so we stop before steps[stepsIndex]
+            // becomes undefined. The off-by-one caused an extra AJAX call with
+            // action "undefined-import" which the server rejected with HTTP 500.
+            if (stepsIndex >= totalSteps) {
                 aarambhaDS.complete(event, response)
                 return
             }

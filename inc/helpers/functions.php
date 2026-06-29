@@ -210,91 +210,163 @@ function aarambha_ds_sanitize_text_or_array_field($array_or_string) {
     return $array_or_string;
 }
 
-
 /**
  * After demo imported action.
  *
- * @since @since 1.1.3
- * @see aarambha_ds_set_elementor_load_fa4_shim()
+ * Enable Font Awesome 4 compatibility.
  */
-add_action( 'aarambha_ds_after_demo_imported', 'aarambha_ds_set_elementor_load_fa4_shim' );
+add_action(
+	'aarambha_ds_after_demo_imported',
+	'aarambha_ds_set_elementor_load_fa4_shim',
+	10
+);
 
-/**
- * Set Elementor Load FontAwesome 4 support.
- *
- * @since @since 1.1.3
- */
 function aarambha_ds_set_elementor_load_fa4_shim() {
-    $elementor_load_fa4_shim = get_option( 'elementor_load_fa4_shim' );
 
-    if ( ! $elementor_load_fa4_shim || '' === $elementor_load_fa4_shim ) {
-        update_option( 'elementor_load_fa4_shim', 'yes' );
-    }
+	if ( ! get_option( 'elementor_load_fa4_shim' ) ) {
+		update_option( 'elementor_load_fa4_shim', 'yes' );
+	}
 }
 
 /**
- * After demo imported action.
- *
- * @since 1.1.3
- * @see aarambha_ds_set_elementor_active_kit()
+ * Run Elementor setup after demo import.
  */
-add_action( 'aarambha_ds_after_demo_imported', 'aarambha_ds_set_elementor_active_kit' );
+add_action(
+	'aarambha_ds_after_demo_imported',
+	'aarambha_ds_setup_after_import',
+	20
+);
+
+function aarambha_ds_setup_after_import() {
+
+	// Elementor must be active.
+	if ( ! did_action( 'elementor/loaded' ) ) {
+		return;
+	}
+
+	// Set active kit.
+	aarambha_ds_set_elementor_active_kit();
+
+	// Recommended Elementor settings.
+	update_option( 'elementor_css_print_method', 'external' );
+	update_option( 'elementor_load_fa4_shim', 'yes' );
+
+	// Regenerate CSS files.
+	aarambha_ds_regenerate_elementor_css();
+
+	// Flush rewrites.
+	flush_rewrite_rules();
+}
 
 /**
- * Set Elementor kit properly.
- *
- * @since 1.1.3
+ * Set Elementor active kit.
  */
 function aarambha_ds_set_elementor_active_kit() {
 
-    $elementor_version = defined( 'ELEMENTOR_VERSION' ) ? ELEMENTOR_VERSION : false;
+	$elementor_version = defined( 'ELEMENTOR_VERSION' ) ? ELEMENTOR_VERSION : false;
 
-    if ( version_compare( $elementor_version, '3.0.0', '>=' ) ) {
+	if ( ! $elementor_version || version_compare( $elementor_version, '3.0.0', '<' ) ) {
+		return;
+	}
 
-        global $wpdb;
-        $page_ids = $wpdb->get_results( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE (post_name = %s OR post_title = %s) AND post_type = 'elementor_library' AND post_status = 'publish'", 'default-kit', 'Default Kit' ) );
+	global $wpdb;
 
-        if ( ! is_null( $page_ids ) ) {
+	$page_ids = $wpdb->get_results(
+		$wpdb->prepare(
+			"SELECT ID
+			FROM {$wpdb->posts}
+			WHERE ( post_name = %s OR post_title = %s )
+			AND post_type = 'elementor_library'
+			AND post_status = 'publish'",
+			'default-kit',
+			'Default Kit'
+		)
+	);
 
-            $page_id    = 0;
-            $delete_ids = array();
+	if ( empty( $page_ids ) ) {
+		return;
+	}
 
-            // Retrieve page with greater id and delete others.
-            if ( sizeof( $page_ids ) > 1 ) {
+	$page_id = 0;
 
-                foreach ( $page_ids as $page ) {
-                    if ( $page->ID > $page_id ) {
-                        if ( $page_id ) {
-                            $delete_ids[] = $page_id;
-                        }
+	foreach ( $page_ids as $page ) {
 
-                        $page_id = $page->ID;
-                    } else {
-                        $delete_ids[] = $page->ID;
-                    }
-                }
-            } else {
-                $page_id = $page_ids[0]->ID;
-            }
+		if ( $page->ID > $page_id ) {
+			$page_id = $page->ID;
+		}
+	}
 
-            // Update `elementor_active_kit` page.
-            if ( $page_id > 0 ) {
-                wp_update_post(
-                    array(
-                        'ID'        => $page_id,
-                        'post_name' => sanitize_title( 'Default Kit' ),
-                    )
-                );
-                update_option( 'elementor_active_kit', $page_id );
-            }
-        }
-    }
+	if ( $page_id > 0 ) {
+
+		wp_update_post(
+			array(
+				'ID'        => $page_id,
+				'post_name' => sanitize_title( 'Default Kit' ),
+			)
+		);
+
+		update_option( 'elementor_active_kit', $page_id );
+	}
 }
 
+/**
+ * Regenerate Elementor CSS and clear cache.
+ */
+function aarambha_ds_regenerate_elementor_css() {
 
+	if ( ! class_exists( '\Elementor\Plugin' ) ) {
+		return;
+	}
 
+	$plugin = \Elementor\Plugin::$instance;
 
+	/**
+	 * Clear Elementor generated CSS/data cache.
+	 */
+	if ( isset( $plugin->files_manager ) ) {
+		$plugin->files_manager->clear_cache();
+	}
 
+	/**
+	 * Regenerate CSS for all Elementor documents.
+	 */
+	if ( class_exists( '\Elementor\Core\Files\CSS\Post' ) ) {
 
+		$posts = get_posts(
+			array(
+				'post_type'      => 'any',
+				'post_status'    => 'publish',
+				'posts_per_page' => -1,
+				'meta_key'       => '_elementor_edit_mode',
+				'meta_value'     => 'builder',
+				'fields'         => 'ids',
+			)
+		);
 
+		foreach ( $posts as $post_id ) {
 
+			try {
+
+				$css_file = new \Elementor\Core\Files\CSS\Post( $post_id );
+				$css_file->update();
+
+			} catch ( Exception $e ) {
+				error_log( $e->getMessage() );
+			}
+		}
+	}
+
+	/**
+	 * Flush Elementor cache.
+	 */
+	if ( method_exists( $plugin, 'flush_cache' ) ) {
+		$plugin->flush_cache();
+	}
+
+	/**
+	 * Clear WP cache.
+	 */
+	wp_cache_flush();
+
+	do_action( 'elementor/core/files/clear_cache' );
+}

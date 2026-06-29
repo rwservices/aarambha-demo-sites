@@ -1,397 +1,67 @@
-#, fuzzy
+# Copyright (C) 2026 Aarambha Themes
+# This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Aarambha Demo Sites\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-02-02 08:22+0000\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Project-Id-Version: Aarambha Demo Sites 1.1.7\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/aarambha-demo-sites\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: \n"
-"Language: \n"
-"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Loco https://localise.biz/\n"
-"X-Loco-Version: 2.6.3; wp-6.1.1\n"
-"X-Domain: aarambha-demo-sites"
+"POT-Creation-Date: 2026-06-04T04:00:53+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
 
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:669
-#, php-format
-msgid "%s &#8220;%s&#8221; already exists."
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:333
-msgid "- Select -"
-msgstr ""
-
-#: inc/main/class-aarambha-ds.php:232
-#, php-format
-msgid ""
-"<p>You need to have one of the themes from <a href=\"%1$s\" "
-"target=\"_blank\">%2$s</a> installed, to use <strong>%3$s</strong> plugin</p>"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:1258
-#, php-format
-msgid ""
-"A new version of this importer is available. Please update to version %s to "
-"ensure compatibility with newer export files."
-msgstr ""
-
-#. Name of the plugin
+#. Plugin Name of the plugin
+#: aarambha-demo-sites.php
 msgid "Aarambha Demo Sites"
 msgstr ""
 
+#. Plugin URI of the plugin
+#: aarambha-demo-sites.php
+msgid "https://aarambhathemes.com/"
+msgstr ""
+
 #. Description of the plugin
-msgid ""
-"Aarambha Demo Sites - it is the perfect plugin to import already inbuilt "
-"theme's demos into your business websites within a click."
+#: aarambha-demo-sites.php
+msgid "Aarambha Demo Sites - it is the perfect plugin to import already inbuilt theme's demos into your business websites within a click."
 msgstr ""
 
 #. Author of the plugin
+#: aarambha-demo-sites.php
 msgid "Aarambha Themes"
 msgstr ""
 
-#: inc/views/plugins-list.php:29 inc/views/plugins-list.php:70
-msgid "Activate"
+#. Author URI of the plugin
+#: aarambha-demo-sites.php
+msgid "https://aarambhathemes.com"
 msgstr ""
 
-#: inc/main/ui/class-aarambha-ds-admin.php:266
-msgid "Activating &#8230;"
-msgstr ""
-
-#: inc/views/plugins-list.php:32 inc/views/plugins-list.php:73
-#: inc/main/ui/class-aarambha-ds-admin.php:267
-msgid "Active"
-msgstr ""
-
-#: inc/views/body.php:38
-msgid "All"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:177
-msgid "All done."
-msgstr ""
-
-#: inc/main/classes/class-aarambha-ds-api.php:169
-msgid "An unknown API error occurred."
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:313
-msgid "as a new user:"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:265
-msgid "Assign Authors"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:323
-msgid "assign posts to an existing user:"
-msgstr ""
-
-#: inc/views/body.php:7
-msgid "Cache successfully cleared."
-msgstr ""
-
-#: inc/main/class-aarambha-ds.php:113 inc/main/class-aarambha-ds.php:124
+#: inc/main/class-aarambha-ds.php:113
+#: inc/main/class-aarambha-ds.php:124
 #: inc/main/classes/class-aarambha-ds-ajax.php:88
 #: inc/main/classes/class-aarambha-ds-ajax.php:103
 #: inc/main/classes/class-aarambha-ds-api.php:84
 #: inc/main/classes/class-aarambha-ds-api.php:99
-#: inc/main/classes/class-aarambha-ds-core.php:95
-#: inc/main/classes/class-aarambha-ds-core.php:110
+#: inc/main/classes/class-aarambha-ds-core.php:96
+#: inc/main/classes/class-aarambha-ds-core.php:111
 #: inc/main/classes/class-aarambha-ds-plugins.php:87
 #: inc/main/classes/class-aarambha-ds-plugins.php:102
-#: inc/main/ui/class-aarambha-ds-admin.php:86
-#: inc/main/ui/class-aarambha-ds-admin.php:101
+#: inc/main/ui/class-aarambha-ds-admin.php:85
+#: inc/main/ui/class-aarambha-ds-admin.php:100
 msgid "Cheatin&#8217; huh?"
 msgstr ""
 
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:1274
-msgid "Choose a WXR (.xml) file to upload, then click Upload file and import."
-msgstr ""
-
-#: inc/views/import.php:12
-msgid "Complete Demo"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:1027
-msgid "Could not create temporary file."
-msgstr ""
-
-#: inc/views/complete.php:23
-msgid "Customize"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-parser.php:43
-msgid ""
-"Details are shown above. The importer will now try again with a different "
-"parser..."
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:281
-msgid "Download and import file attachments"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:1086
-msgid "Downloaded file has incorrect size"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:387
-#, php-format
-msgid ""
-"Failed to create new user for %s. Their posts will be attributed to the "
-"current user."
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:539
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:765
-#, php-format
-msgid "Failed to import %s %s"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:731
-#, php-format
-msgid "Failed to import %s &#8220;%s&#8221;"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:632
-#, php-format
-msgid "Failed to import &#8220;%s&#8221;: Invalid post type %s"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:239
-#, php-format
-msgid ""
-"Failed to import author %s. Their posts will be attributed to the current "
-"user."
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:439
-#, php-format
-msgid "Failed to import category %s"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:484
-#, php-format
-msgid "Failed to import post tag %s"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:975
-msgid "Fetching attachments is not enabled"
-msgstr ""
-
-#: inc/main/ui/class-aarambha-ds-admin.php:310
-msgid "Finalizing the Import &#8230;"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:177
-msgid "Have fun!"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:1273
-msgid ""
-"Howdy! Upload your WordPress eXtended RSS (WXR) file and we&#8217;ll import "
-"the posts, pages, comments, custom fields, categories, and tags into this "
-"site."
-msgstr ""
-
-#. Author URI of the plugin
-msgid "https://aarambhathemes.com"
-msgstr ""
-
-#. URI of the plugin
-msgid "https://aarambhathemes.com/"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:268
-#, php-format
-msgid ""
-"If a new user is created by WordPress, a new password will be randomly "
-"generated and the new user&#8217;s role will be set as %s. Manually changing "
-"the new user&#8217;s details will be necessary."
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:278
-msgid "Import Attachments"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:298
-msgid "Import author:"
-msgstr ""
-
-#: inc/views/complete.php:14
-msgid "Import Complete"
-msgstr ""
-
-#: inc/main/ui/class-aarambha-ds-admin.php:264
-msgid "Import Content"
-msgstr ""
-
-#: inc/main/class-aarambha-ds.php:140 inc/main/class-aarambha-ds.php:141
+#: inc/main/class-aarambha-ds.php:140
+#: inc/main/class-aarambha-ds.php:141
 #: inc/views/body.php:113
 msgid "Import Demo"
 msgstr ""
 
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:1251
-msgid "Import WordPress"
-msgstr ""
-
-#: inc/main/classes/class-aarambha-ds-widget-importer.php:185
-msgid "Imported"
-msgstr ""
-
-#: inc/main/classes/class-aarambha-ds-widget-importer.php:188
-msgid "Imported to Inactive"
-msgstr ""
-
-#: inc/main/ui/class-aarambha-ds-admin.php:278
-msgid "Importing Content&#8230;"
-msgstr ""
-
-#: inc/main/ui/class-aarambha-ds-admin.php:282
-msgid "Importing Customize Information &#8230;"
-msgstr ""
-
-#: inc/main/classes/class-aarambha-ds-core.php:291
-msgid "Importing Options"
-msgstr ""
-
-#: inc/main/ui/class-aarambha-ds-admin.php:290
-msgid "Importing Slider &#8230;"
-msgstr ""
-
-#: inc/main/ui/class-aarambha-ds-admin.php:286
-msgid "Importing Widgets &#8230;"
-msgstr ""
-
-#: inc/main/ui/class-aarambha-ds-admin.php:263
-msgid "Install Plugins"
-msgstr ""
-
-#: inc/main/ui/class-aarambha-ds-admin.php:265
-msgid "Installing &#8230;"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:988
-msgid "Invalid file type"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:912
+#: inc/main/class-aarambha-ds.php:232
 #, php-format
-msgid "Menu item skipped due to invalid menu slug: %s"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:905
-msgid "Menu item skipped due to missing menu slug"
-msgstr ""
-
-#: inc/main/classes/class-aarambha-ds-api.php:180
-msgid "No data received. May be data is malformed."
-msgstr ""
-
-#: inc/views/body.php:131
-msgid "No demos found for theme. Please try again later."
-msgstr ""
-
-#: inc/main/classes/class-aarambha-ds-widget-importer.php:194
-msgid "No Title"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:325
-msgid "or assign posts to an existing user:"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:310
-msgid "or create new user with login name:"
-msgstr ""
-
-#: inc/views/importing.php:6
-msgid "Please wait while the content is being imported!"
-msgstr ""
-
-#: inc/views/importing.php:12
-msgid ""
-"Please wait while the demo site is being installed.This process may take "
-"upto 10 minutes to complete. Please do not refresh or close this page."
-msgstr ""
-
-#: inc/main/ui/class-aarambha-ds-admin.php:262
-msgid "Please Wait!"
-msgstr ""
-
-#: inc/main/ui/class-aarambha-ds-admin.php:298
-msgid "Preparing to import &#8230;"
-msgstr ""
-
-#: inc/main/ui/class-aarambha-ds-admin.php:261
-msgid "Preview"
-msgstr ""
-
-#: inc/views/body.php:104
-msgid "Pro"
-msgstr ""
-
-#: inc/main/ui/class-aarambha-ds-admin.php:260
-msgid "Purchase Now"
-msgstr ""
-
-#: inc/views/plugins-list.php:19 inc/views/plugins-list.php:60
-msgid "Ready to Install"
-msgstr ""
-
-#: inc/main/ui/class-aarambha-ds-admin.php:274
-msgid "Refresh the page, and try again!"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:178
-msgid "Remember to update the passwords and roles of imported users."
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:1092
-#, php-format
-msgid "Remote file is too large, limit is %s"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:1074
-msgid "Remote server did not respond"
-msgstr ""
-
-#. 1: The HTTP error message. 2: The HTTP error code.
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:1062
-#, php-format
-msgid "Remote server returned the following unexpected result: %1$s (%2$s)"
-msgstr ""
-
-#. 1: The WordPress error message. 2: The WordPress error code.
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:1046
-#, php-format
-msgid "Request failed due to an error: %1$s (%2$s)"
-msgstr ""
-
-#: inc/views/plugins-list.php:2
-msgid "Required plugins for this demo."
-msgstr ""
-
-#: inc/main/ui/class-aarambha-ds-admin.php:302
-msgid "Setting Menus &#8230;"
-msgstr ""
-
-#: inc/main/ui/class-aarambha-ds-admin.php:306
-msgid "Setting Pages &#8230;"
-msgstr ""
-
-#: inc/main/classes/class-aarambha-ds-widget-importer.php:69
-msgid "Sidebar does not exist in theme (moving widget to Inactive)"
-msgstr ""
-
-#: inc/main/classes/class-aarambha-ds-widget-importer.php:91
-msgid "Site does not support widget"
-msgstr ""
-
-#: inc/main/ui/class-aarambha-ds-admin.php:294
-msgid "Something Went Wrong!"
+msgid "<p>You need to have one of the themes from <a href=\"%1$s\" target=\"_blank\">%2$s</a> installed, to use <strong>%3$s</strong> plugin</p>"
 msgstr ""
 
 #: inc/main/classes/class-aarambha-ds-ajax.php:163
@@ -409,66 +79,8 @@ msgstr ""
 #: inc/main/classes/class-aarambha-ds-ajax.php:614
 #: inc/main/classes/class-aarambha-ds-ajax.php:657
 #: inc/main/classes/class-aarambha-ds-ajax.php:748
-#: inc/main/ui/class-aarambha-ds-admin.php:268
+#: inc/main/ui/class-aarambha-ds-admin.php:381
 msgid "Sorry!"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:133
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:142
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:193
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:197
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:206
-msgid "Sorry, there has been an error."
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:1124
-msgid "Sorry, this file type is not permitted for security reasons."
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:285
-msgid "Submit"
-msgstr ""
-
-#: inc/views/popups/purchase-theme.php:9
-msgid ""
-"Thank you for being our valued customer. Your support and trust are much "
-"appreciated."
-msgstr ""
-
-#: inc/views/popups/activate-theme.php:9
-msgid ""
-"Thank you for purchasing our super cool product. Wish you all the success."
-msgstr ""
-
-#: inc/main/classes/customize/class-aarambha-ds-customize-importer.php:34
-msgid ""
-"The customizer import file is not in a correct format. Please make sure to "
-"use the correct customizer import file."
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:198
-#, php-format
-msgid ""
-"The export file could not be found at <code>%s</code>. It is likely that "
-"this was caused by a permissions problem."
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:134
-msgid "The file does not exist, please try again."
-msgstr ""
-
-#: inc/views/plugins-list.php:4
-msgid "The following plugins are required to be installed for this demo:"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:1139
-msgid "The uploaded file could not be moved"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wxr-parser-simplexml.php:30
-#: inc/main/classes/wordpress-importer/class-wxr-parser-simplexml.php:38
-#: inc/main/classes/wordpress-importer/class-wxr-parser.php:42
-msgid "There was an error when reading this WXR file"
 msgstr ""
 
 #: inc/main/classes/class-aarambha-ds-ajax.php:164
@@ -489,68 +101,528 @@ msgstr ""
 msgid "This action cannot be performed now. Please try again later!"
 msgstr ""
 
-#: inc/main/classes/wordpress-importer/class-wxr-parser-regex.php:97
-#: inc/main/classes/wordpress-importer/class-wxr-parser-simplexml.php:42
-#: inc/main/classes/wordpress-importer/class-wxr-parser-simplexml.php:47
-#: inc/main/classes/wordpress-importer/class-wxr-parser-xml.php:49
-msgid ""
-"This does not appear to be a WXR file, missing/invalid WXR version number"
+#: inc/main/classes/class-aarambha-ds-api.php:169
+msgid "An unknown API error occurred."
 msgstr ""
 
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:214
-#, php-format
-msgid ""
-"This WXR file (version %s) may not be supported by this version of the "
-"importer. Please consider updating."
+#: inc/main/classes/class-aarambha-ds-api.php:180
+msgid "No data received. May be data is malformed."
 msgstr ""
 
-#: inc/views/popups/purchase-theme.php:10
-msgid "To access all Premium Demos / Templates, please Upgrade to Pro."
+#: inc/main/classes/class-aarambha-ds-core.php:316
+msgid "Import failed. Please check the WXR file and try again."
 msgstr ""
 
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:266
-msgid ""
-"To make it simpler for you to edit and save the imported content, you may "
-"want to reassign the author of the imported item to an existing user of this "
-"site, such as your primary administrator account."
+#: inc/main/classes/class-aarambha-ds-core.php:322
+msgid "Importing Options"
 msgstr ""
 
-#: inc/main/classes/class-aarambha-ds-plugins.php:395
+#: inc/main/classes/class-aarambha-ds-plugins.php:424
 msgid "Unable to connect to the filesystem. Please confirm your credentials."
-msgstr ""
-
-#: inc/views/complete.php:29
-msgid "Upgrade to Pro"
-msgstr ""
-
-#: inc/views/complete.php:19
-msgid "View Demo"
-msgstr ""
-
-#: inc/main/ui/class-aarambha-ds-admin.php:270
-msgid "We cannot import now. Please try again later!"
-msgstr ""
-
-#: inc/views/import.php:21
-msgid "We suggest you to import Complete Demo."
-msgstr ""
-
-#: inc/views/import.php:3
-msgid "What would you like to import?"
-msgstr ""
-
-#: inc/main/classes/class-aarambha-ds-widget-importer.php:126
-msgid "Widget already exists"
 msgstr ""
 
 #: inc/main/classes/class-aarambha-ds-widget-importer.php:32
 msgid "Widget import data could not be read. Please try a different file."
 msgstr ""
 
-#: inc/main/ui/class-aarambha-ds-admin.php:259
+#: inc/main/classes/class-aarambha-ds-widget-importer.php:69
+msgid "Sidebar does not exist in theme (moving widget to Inactive)"
+msgstr ""
+
+#: inc/main/classes/class-aarambha-ds-widget-importer.php:91
+msgid "Site does not support widget"
+msgstr ""
+
+#: inc/main/classes/class-aarambha-ds-widget-importer.php:126
+msgid "Widget already exists"
+msgstr ""
+
+#: inc/main/classes/class-aarambha-ds-widget-importer.php:185
+msgid "Imported"
+msgstr ""
+
+#: inc/main/classes/class-aarambha-ds-widget-importer.php:188
+msgid "Imported to Inactive"
+msgstr ""
+
+#: inc/main/classes/class-aarambha-ds-widget-importer.php:194
+msgid "No Title"
+msgstr ""
+
+#: inc/main/classes/customize/class-aarambha-ds-customize-importer.php:34
+msgid "The customizer import file is not in a correct format. Please make sure to use the correct customizer import file."
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:151
+msgid "URL rewriting requires WordPress 6.7 or newer. The import will continue without rewriting URLs."
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:183
+#: inc/main/classes/wordpress-importer/class-wp-import.php:194
+#: inc/main/classes/wordpress-importer/class-wp-import.php:268
+#: inc/main/classes/wordpress-importer/class-wp-import.php:272
+#: inc/main/classes/wordpress-importer/class-wp-import.php:283
+msgid "Sorry, there has been an error."
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:184
+msgid "The file does not exist, please try again."
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:252
+msgid "All done."
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:252
+msgid "Have fun!"
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:253
+msgid "Remember to update the passwords and roles of imported users."
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:273
+#, php-format
+msgid "The export file could not be found at <code>%s</code>. It is likely that this was caused by a permissions problem."
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:291
+#, php-format
+msgid "This WXR file (version %s) may not be supported by this version of the importer. Please consider updating."
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:316
+#, php-format
+msgid "Failed to import author %s. Their posts will be attributed to the current user."
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:344
+msgid "Assign Authors"
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:345
+msgid "To make it simpler for you to edit and save the imported content, you may want to reassign the author of the imported item to an existing user of this site, such as your primary administrator account."
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:347
+#, php-format
+msgid "If a new user is created by WordPress, a new password will be randomly generated and the new user&#8217;s role will be set as %s. Manually changing the new user&#8217;s details will be necessary."
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:357
+msgid "Import Attachments"
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:360
+msgid "Download and import file attachments"
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:364
+msgid "Content Options"
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:367
+msgid "Change all imported URLs that currently link to the previous site so that they now link to this site"
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:370
+msgid "Submit"
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:384
+msgid "Import author:"
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:399
+msgid "or create new user with login name:"
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:402
+msgid "as a new user:"
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:412
+msgid "assign posts to an existing user:"
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:414
+msgid "or assign posts to an existing user:"
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:423
+msgid "- Select -"
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:482
+#, php-format
+msgid "Failed to create new user for %s. Their posts will be attributed to the current user."
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:551
+#, php-format
+msgid "Failed to import category %s"
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:624
+#, php-format
+msgid "Failed to import post tag %s"
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:703
+#: inc/main/classes/wordpress-importer/class-wp-import.php:1205
+#, php-format
+msgid "Failed to import %1$s %2$s"
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:794
+#, php-format
+msgid "Failed to import &#8220;%1$s&#8221;: Invalid post type %2$s"
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:835
+#, php-format
+msgid "%1$s &#8220;%2$s&#8221; already exists."
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:930
+#, php-format
+msgid "Failed to import %1$s &#8220;%2$s&#8221;"
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:1253
+msgid "Menu item skipped due to missing menu slug"
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:1260
+#, php-format
+msgid "Menu item skipped due to invalid menu slug: %s"
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:1327
+msgid "Fetching attachments is not enabled"
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:1345
+msgid "Invalid file type"
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:1389
+msgid "Could not create temporary file."
+msgstr ""
+
+#. translators: 1: The WordPress error message. 2: The WordPress error code.
+#: inc/main/classes/wordpress-importer/class-wp-import.php:1411
+#, php-format
+msgid "Request failed due to an error: %1$s (%2$s)"
+msgstr ""
+
+#. translators: 1: The HTTP error message. 2: The HTTP error code.
+#: inc/main/classes/wordpress-importer/class-wp-import.php:1427
+#, php-format
+msgid "Remote server returned the following unexpected result: %1$s (%2$s)"
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:1439
+msgid "Remote server did not respond"
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:1446
+msgid "Zero size file downloaded"
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:1451
+msgid "Downloaded file has incorrect size"
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:1457
+#, php-format
+msgid "Remote file is too large, limit is %s"
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:1489
+msgid "Sorry, this file type is not permitted for security reasons."
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:1504
+msgid "The uploaded file could not be moved"
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:1684
+msgid "Import WordPress"
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:1691
+#, php-format
+msgid "A new version of this importer is available. Please update to version %s to ensure compatibility with newer export files."
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:1706
+msgid "Howdy! Upload your WordPress eXtended RSS (WXR) file and we&#8217;ll import the posts, pages, comments, custom fields, categories, and tags into this site."
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/class-wp-import.php:1707
+msgid "Choose a WXR (.xml) file to upload, then click Upload file and import."
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/parsers/class-wxr-parser-regex.php:104
+#: inc/main/classes/wordpress-importer/parsers/class-wxr-parser-simplexml.php:46
+#: inc/main/classes/wordpress-importer/parsers/class-wxr-parser-simplexml.php:52
+#: inc/main/classes/wordpress-importer/parsers/class-wxr-parser-xml-processor.php:190
+#: inc/main/classes/wordpress-importer/parsers/class-wxr-parser-xml.php:106
+msgid "This does not appear to be a WXR file, missing/invalid WXR version number"
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/parsers/class-wxr-parser-simplexml.php:33
+#: inc/main/classes/wordpress-importer/parsers/class-wxr-parser-simplexml.php:41
+#: inc/main/classes/wordpress-importer/parsers/class-wxr-parser.php:68
+msgid "There was an error when reading this WXR file"
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/parsers/class-wxr-parser.php:27
+#: inc/main/classes/wordpress-importer/parsers/class-wxr-parser.php:28
+#, php-format
+msgid "Invalid parser specified: %s"
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/parsers/class-wxr-parser.php:69
+msgid "Details are shown above. The importer will now try again with a different parser..."
+msgstr ""
+
+#. translators: %s: XMLProcessor::create_fragment().
+#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:883
+#, php-format
+msgid "Call %s to create an XML Processor instead of calling the constructor directly."
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:911
+msgid "Cannot append bytes after the last input chunk was provided and input_finished() was called."
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:1463
+msgid "Too many bookmarks: cannot create any more."
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:1570
+msgid "Please pass a query array to this function."
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:1598
+msgid "Cannot visit tag closers in XML Processor."
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:1614
+msgid "Breadcrumbs must be an array of strings or two-tuples of (namespace, local name)."
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:2670
+msgid "Unknown bookmark name."
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:2680
+msgid "Too many calls to seek() - this can lead to performance issues."
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:2857
+#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:2896
+msgid "Invalid attribute value encountered."
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:3363
+msgid "Invalid text content encountered."
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:3412
+msgid "Cannot set text content on a non-text node."
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:3440
+msgid "Non-string attribute values cannot be passed to set_attribute()."
+msgstr ""
+
+#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:3448
+msgid "Setting attributes in the xmlns namespace is not yet supported by set_attribute()."
+msgstr ""
+
+#. Translators: 1: The XML namespace.
+#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:3467
+#, php-format
+msgid "The namespace \"%1$s\" is not in the current element's scope."
+msgstr ""
+
+#. Translators: 1: The closing tag name. 2: The opening tag name.
+#. translators: %1$s is the name of the closing HTML tag, %2$s is the name of the opening HTML tag.
+#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:3830
+#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:3842
+#, php-format
+msgid "The closing tag \"%1$s\" did not match the opening tag \"%2$s\"."
+msgstr ""
+
+#. translators: %1$s is the unexpected token type.
+#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:3862
+#, php-format
+msgid "Unexpected token type \"%1$s\" in element stage."
+msgstr ""
+
+#: inc/main/ui/class-aarambha-ds-admin.php:372
 msgid "You're Offline!"
 msgstr ""
 
-#: inc/main/classes/wordpress-importer/class-wxr-importer.php:1081
-msgid "Zero size file downloaded"
+#: inc/main/ui/class-aarambha-ds-admin.php:373
+msgid "Purchase Now"
+msgstr ""
+
+#: inc/main/ui/class-aarambha-ds-admin.php:374
+msgid "Preview"
+msgstr ""
+
+#: inc/main/ui/class-aarambha-ds-admin.php:375
+msgid "Please Wait!"
+msgstr ""
+
+#: inc/main/ui/class-aarambha-ds-admin.php:376
+msgid "Install Plugins"
+msgstr ""
+
+#: inc/main/ui/class-aarambha-ds-admin.php:377
+msgid "Import Content"
+msgstr ""
+
+#: inc/main/ui/class-aarambha-ds-admin.php:378
+msgid "Installing &#8230;"
+msgstr ""
+
+#: inc/main/ui/class-aarambha-ds-admin.php:379
+msgid "Activating &#8230;"
+msgstr ""
+
+#: inc/main/ui/class-aarambha-ds-admin.php:380
+#: inc/views/plugins-list.php:32
+#: inc/views/plugins-list.php:73
+msgid "Active"
+msgstr ""
+
+#: inc/main/ui/class-aarambha-ds-admin.php:383
+msgid "We cannot import now. Please try again later!"
+msgstr ""
+
+#: inc/main/ui/class-aarambha-ds-admin.php:384
+msgid "Refresh the page, and try again!"
+msgstr ""
+
+#: inc/main/ui/class-aarambha-ds-admin.php:385
+msgid "Importing Content&#8230;"
+msgstr ""
+
+#: inc/main/ui/class-aarambha-ds-admin.php:386
+msgid "Importing Customize Information &#8230;"
+msgstr ""
+
+#: inc/main/ui/class-aarambha-ds-admin.php:387
+msgid "Importing Widgets &#8230;"
+msgstr ""
+
+#: inc/main/ui/class-aarambha-ds-admin.php:388
+msgid "Importing Slider &#8230;"
+msgstr ""
+
+#: inc/main/ui/class-aarambha-ds-admin.php:389
+msgid "Something Went Wrong!"
+msgstr ""
+
+#: inc/main/ui/class-aarambha-ds-admin.php:390
+msgid "Preparing to import &#8230;"
+msgstr ""
+
+#: inc/main/ui/class-aarambha-ds-admin.php:391
+msgid "Setting Menus &#8230;"
+msgstr ""
+
+#: inc/main/ui/class-aarambha-ds-admin.php:392
+msgid "Setting Pages &#8230;"
+msgstr ""
+
+#: inc/main/ui/class-aarambha-ds-admin.php:393
+msgid "Finalizing the Import &#8230;"
+msgstr ""
+
+#: inc/views/body.php:7
+msgid "Cache successfully cleared."
+msgstr ""
+
+#: inc/views/body.php:38
+msgid "All"
+msgstr ""
+
+#: inc/views/body.php:104
+msgid "Pro"
+msgstr ""
+
+#: inc/views/body.php:131
+msgid "No demos found for theme. Please try again later."
+msgstr ""
+
+#: inc/views/complete.php:14
+msgid "Import Complete"
+msgstr ""
+
+#: inc/views/complete.php:19
+msgid "View Demo"
+msgstr ""
+
+#: inc/views/complete.php:23
+msgid "Customize"
+msgstr ""
+
+#: inc/views/complete.php:29
+msgid "Upgrade to Pro"
+msgstr ""
+
+#: inc/views/import.php:3
+msgid "What would you like to import?"
+msgstr ""
+
+#: inc/views/import.php:12
+msgid "Complete Demo"
+msgstr ""
+
+#: inc/views/import.php:21
+msgid "We suggest you to import Complete Demo."
+msgstr ""
+
+#: inc/views/importing.php:6
+msgid "Please wait while the content is being imported!"
+msgstr ""
+
+#: inc/views/importing.php:12
+msgid "Please wait while the demo site is being installed.This process may take upto 10 minutes to complete. Please do not refresh or close this page."
+msgstr ""
+
+#: inc/views/plugins-list.php:2
+msgid "Required plugins for this demo."
+msgstr ""
+
+#: inc/views/plugins-list.php:4
+msgid "The following plugins are required to be installed for this demo:"
+msgstr ""
+
+#: inc/views/plugins-list.php:19
+#: inc/views/plugins-list.php:60
+msgid "Ready to Install"
+msgstr ""
+
+#: inc/views/plugins-list.php:29
+#: inc/views/plugins-list.php:70
+msgid "Activate"
+msgstr ""
+
+#: inc/views/popups/activate-theme.php:9
+msgid "Thank you for purchasing our super cool product. Wish you all the success."
+msgstr ""
+
+#: inc/views/popups/purchase-theme.php:9
+msgid "Thank you for being our valued customer. Your support and trust are much appreciated."
+msgstr ""
+
+#: inc/views/popups/purchase-theme.php:10
+msgid "To access all Premium Demos / Templates, please Upgrade to Pro."
 msgstr ""
