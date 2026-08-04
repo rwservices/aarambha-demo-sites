@@ -77,6 +77,23 @@ class Aarambha_DS_Ajax
      */
     private function startBuffer()
     {
+        // Long-running steps (content-import in particular, via WP_Importer)
+        // can run well past PHP's default 30s max_execution_time on many
+        // hosts. Lift PHP's own ceiling here. NOTE: this only helps if PHP
+        // itself is the bottleneck — it cannot override a reverse proxy or
+        // CDN sitting in front of PHP (nginx/Apache/PHP-FPM/Cloudflare have
+        // their own independent timeouts that must be raised separately).
+        if (function_exists('set_time_limit')) {
+            @set_time_limit(0);
+        }
+        @ini_set('max_execution_time', '0');
+
+        // Large XML imports can also exhaust a low default memory_limit.
+        $currentLimit = ini_get('memory_limit');
+        if ('-1' !== $currentLimit && (int) $currentLimit < 1024) {
+            @ini_set('memory_limit', '1024M');
+        }
+
         // Disable all PHP error display — errors must go to the log, not stdout.
         @ini_set('display_errors', '0');
         while (ob_get_level() > 0) {
@@ -282,13 +299,15 @@ class Aarambha_DS_Ajax
     {
         $this->startBuffer();
 
-        if (empty($_REQUEST['nonce']) || !wp_verify_nonce($_REQUEST['nonce'])) {
+        if (empty($_REQUEST['nonce'])) {
             $this->sendError([
                 'code'    => 'invalid_nonce',
                 'title'   => esc_html__('Permission denied', 'aarambha-demo-sites'),
                 'message' => esc_html__('Invalid or missing nonce for prepare-import.', 'aarambha-demo-sites'),
             ]);
         }
+
+        $this->verifyNonce($_REQUEST['nonce'], 'prepare-import');
 
         $theme = aarambha_ds_get_theme();
         $slug  = sanitize_text_field($_REQUEST['slug']);

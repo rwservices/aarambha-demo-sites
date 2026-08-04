@@ -358,7 +358,7 @@
                             var html = template()
 
                             el.dataset.action = 'prepare-import'
-                            el.dataset.nonce = aarambhaDSData.nonce
+                            el.dataset.nonce = aarambhaDSData.nonces.prepareImport
                             el.innerText = aarambhaDSData.importContent
                             el.classList.remove('aarambha-ds--action__list')
                             el.classList.add('aarambha-ds--action__import')
@@ -503,7 +503,7 @@
                                 let targetEl = document.querySelector('.' + target)
 
                                 el.dataset.action = 'prepare-import'
-                                el.dataset.nonce = aarambhaDSData.nonce
+                                el.dataset.nonce = aarambhaDSData.nonces.prepareImport
                                 el.innerText = aarambhaDSData.importContent
                                 el.classList.remove('aarambha-ds--action__list')
                                 el.classList.add('aarambha-ds--action__import')
@@ -640,7 +640,22 @@
                     var filesKey = Object.keys(files);
 
                     if ('complete' === contentType) {
-                        steps = filesKey.concat(steps.filter((item) => filesKey.indexOf(item) < 0))
+                        // The server's prepareImport handler always issues the
+                        // next nonce for the "import-content" action, so the
+                        // very first import call MUST be "content-import"
+                        // regardless of the on-disk/associative-array order of
+                        // filesKey. Without this, "content" sometimes lands
+                        // later in the list, the first call fires as e.g.
+                        // "customizer-import", and it's rejected because the
+                        // nonce was created for a different action — causing
+                        // an intermittent failure that "fixes itself" on retry
+                        // whenever the order happens to line up.
+                        var orderedFiles = filesKey.filter((item) => 'content' !== item)
+                        if (filesKey.indexOf('content') > -1) {
+                            orderedFiles.unshift('content')
+                        }
+
+                        steps = orderedFiles.concat(steps.filter((item) => orderedFiles.indexOf(item) < 0))
                         data.steps = steps
                     }
 
