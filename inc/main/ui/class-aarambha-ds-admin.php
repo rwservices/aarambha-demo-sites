@@ -110,8 +110,107 @@ class Aarambha_DS_Admin
     {
         add_action('admin_menu', [$this, 'createAdminMenu']);
         add_action('admin_footer', [$this, 'renderTemplates']);
+        add_action('admin_notices', [$this, 'phpRequirementsNotice']);
 
         add_action('admin_init', [$this, 'onAdminInit']);
+    }
+
+    /**
+     * Display an admin notice if the server's PHP settings fall below
+     * the recommended values for running the demo importer.
+     *
+     * @since 1.0.0
+     * @return void
+     */
+    public function phpRequirementsNotice()
+    {
+        if (!current_user_can('manage_options')) {
+            return;
+        }
+
+        $screen = get_current_screen();
+
+        // Only show on the plugin's own admin page.
+        if (!$screen || $this->page !== $screen->id) {
+            return;
+        }
+
+        $requirements = [
+            'max_execution_time' => [
+                'label'       => esc_html__('Max Execution Time', 'aarambha-demo-sites'),
+                'recommended' => 1200,
+                'current'     => (int) ini_get('max_execution_time'),
+                'unit'        => esc_html__('s', 'aarambha-demo-sites'),
+            ],
+            'max_input_time' => [
+                'label'       => esc_html__('Max Input Time', 'aarambha-demo-sites'),
+                'recommended' => 600,
+                'current'     => (int) ini_get('max_input_time'),
+                'unit'        => esc_html__('s', 'aarambha-demo-sites'),
+            ],
+            'memory_limit' => [
+                'label'       => esc_html__('Memory Limit', 'aarambha-demo-sites'),
+                'recommended' => 512,
+                'current'     => (int) (wp_convert_hr_to_bytes(ini_get('memory_limit')) / MB_IN_BYTES),
+                'unit'        => 'M',
+            ],
+        ];
+
+        $unmet = [];
+
+        foreach ($requirements as $key => $req) {
+            // -1 means "unlimited" for execution/input time — treat as satisfied.
+            if (-1 === $req['current']) {
+                continue;
+            }
+
+            if ($req['current'] < $req['recommended']) {
+                $unmet[$key] = $req;
+            }
+        }
+
+        if (empty($unmet)) {
+            return;
+        }
+?>
+        <div class="notice notice-warning is-dismissible aarambha-ds-php-requirements-notice">
+            <p>
+                <strong><?php esc_html_e('Demo Importer: Server Configuration Warning', 'aarambha-demo-sites'); ?></strong>
+            </p>
+            <p>
+                <?php esc_html_e('Your server\'s current PHP settings may cause the demo import to fail or time out. Recommended minimum values:', 'aarambha-demo-sites'); ?>
+            </p>
+            <table class="widefat" style="max-width: 600px; margin-bottom: 10px;">
+                <thead>
+                    <tr>
+                        <th><?php esc_html_e('Setting', 'aarambha-demo-sites'); ?></th>
+                        <th><?php esc_html_e('Current Value', 'aarambha-demo-sites'); ?></th>
+                        <th><?php esc_html_e('Recommended', 'aarambha-demo-sites'); ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($unmet as $req) : ?>
+                        <tr>
+                            <td><?php echo esc_html($req['label']); ?></td>
+                            <td style="color: #d63638; font-weight: bold;">
+                                <?php echo esc_html($req['current'] . $req['unit']); ?>
+                            </td>
+                            <td><?php echo esc_html($req['recommended'] . $req['unit']); ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+            <p>
+                <?php
+                printf(
+                    /* translators: %s: link to WordPress wp-config editing guide */
+                    esc_html__('Please ask your hosting provider to increase these values, or update them yourself. %s', 'aarambha-demo-sites'),
+                    '<a href="https://wordpress.org/support/article/editing-wp-config-php/" target="_blank" rel="noopener noreferrer">' . esc_html__('Learn how', 'aarambha-demo-sites') . '</a>'
+                );
+                ?>
+            </p>
+        </div>
+<?php
     }
 
     /**

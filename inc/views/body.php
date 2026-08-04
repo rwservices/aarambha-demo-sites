@@ -107,7 +107,7 @@
                             </div>
 
 
-                            <a class="more-details--demo more-details" data-slug="<?php echo esc_attr($slug); ?>" data-type="<?php echo esc_attr($demoType); ?>" data-purchase-link="<?php echo esc_url($purchaseUrl); ?>" data-nonce="<?php echo esc_attr( wp_create_nonce($nonce) ); ?>">
+                            <a class="more-details--demo more-details" data-slug="<?php echo esc_attr($slug); ?>" data-type="<?php echo esc_attr($demoType); ?>" data-purchase-link="<?php echo esc_url($purchaseUrl); ?>" data-nonce="<?php echo esc_attr(wp_create_nonce($nonce)); ?>">
                                 <span class="ocdi--loader"></span>
                                 <span>
                                     <?php esc_html_e('Import Demo', 'aarambha-demo-sites'); ?>
@@ -126,6 +126,7 @@
 
                         </div>
                     <?php endforeach; ?>
+
                 <?php else : ?>
                     <h3>
                         <?php esc_html_e('No demos found for theme. Please try again later.', 'aarambha-demo-sites'); ?>

@@ -5,9 +5,7 @@ module.exports = function( grunt ) {
 		'**', // include everything
 		'!node_modules/**', // exclude node_modules
 		'!vendor/**', // exclude vendor directory
-		'!assets/src/images/**', // exclude source assets/images
-		'!assets/src/library/**', // exclude source assets/library
-		'!assets/src/webfonts/**', // exclude source assets/webfonts
+		'!assets/src/**', // exclude source assets/src
 		'!cypress/**', // exclude Cypress tests
 		'!tests/**', // exclude unit tests
 		'!build/**', // exclude build output
@@ -31,8 +29,6 @@ module.exports = function( grunt ) {
 		'!**/.DS_Store', // exclude macOS metadata
 		'!**/*.tmp', // exclude temporary files
 	];
-
-	const excludeCopyFilesPro = copyFiles.slice( 0 ).concat( [ '!changelog.txt' ] );
 
 	// Project configuration
 	grunt.initConfig( {
@@ -89,7 +85,7 @@ module.exports = function( grunt ) {
 			pro: {
 				files: [ {
 					expand: true,
-					src: excludeCopyFilesPro,
+					src: copyFiles,
 					dest: 'build/<%= pkg.name %>/',
 				} ],
 			},
