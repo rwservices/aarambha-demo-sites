@@ -1,5 +1,9 @@
 == Changelog ==
 
+= 2.0.0 - August 05 2026 =
+* Deprecated bundled WordPress Importer plugin files and now require it as an external required plugin.
+* Added admin notice showing server PHP settings relevant to the demo importer.
+
 = 1.1.7 - November 20 2023 =
 * Tested up to wp version 6.4
 * Updated sweetalert2 library.

@@ -1,11 +1,11 @@
 === Aarambha Demo Sites ===
 
 Contributors: aarambhathemes
-Tags: aarambhathemes, one click import, importer, theme demos, demo templates, demo sites
-Requires at least: 5.7
-Tested up to: 6.4
+Tags: one click import, theme demos, aarambhathemes demos
+Requires at least: 6.7
+Tested up to: 7.0
 Requires PHP: 7.0
-Stable tag: 1.1.7
+Stable tag: 2.0.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
