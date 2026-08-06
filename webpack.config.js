@@ -26,6 +26,8 @@ if ( ! fs.existsSync( BUILD_DIR ) ) {
 }
 
 // Shared base config
+const LIBRARY_EXCLUDE = /(^|[\\/])library[\\/]/;
+
 const sharedConfig = {
 	...defaultConfig,
 	output: {
@@ -52,7 +54,17 @@ const sharedConfig = {
 		splitChunks: {
 			...defaultConfig.optimization.splitChunks,
 		},
-		minimizer: defaultConfig.optimization.minimizer.concat( [ new CssMinimizerPlugin() ] ),
+		minimizer: defaultConfig.optimization.minimizer
+			.map( ( plugin ) => {
+				// wp-scripts' default TerserPlugin instance — add an exclude for library files
+				if ( plugin.options ) {
+					plugin.options.exclude = LIBRARY_EXCLUDE;
+				}
+				return plugin;
+			} )
+			.concat( [
+				new CssMinimizerPlugin( { exclude: LIBRARY_EXCLUDE } ),
+			] ),
 	},
 };
 

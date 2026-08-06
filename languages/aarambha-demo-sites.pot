@@ -2,14 +2,14 @@
 # This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Aarambha Demo Sites 1.1.7\n"
+"Project-Id-Version: Aarambha Demo Sites 2.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/aarambha-demo-sites\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-06-04T04:00:53+00:00\n"
+"POT-Creation-Date: 2026-08-05T12:35:19+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 
@@ -38,67 +38,150 @@ msgstr ""
 msgid "https://aarambhathemes.com"
 msgstr ""
 
+#: inc/main/class-aarambha-ds.php:103
 #: inc/main/class-aarambha-ds.php:113
-#: inc/main/class-aarambha-ds.php:124
-#: inc/main/classes/class-aarambha-ds-ajax.php:88
-#: inc/main/classes/class-aarambha-ds-ajax.php:103
+#: inc/main/classes/class-aarambha-ds-ajax.php:34
+#: inc/main/classes/class-aarambha-ds-ajax.php:39
 #: inc/main/classes/class-aarambha-ds-api.php:84
 #: inc/main/classes/class-aarambha-ds-api.php:99
-#: inc/main/classes/class-aarambha-ds-core.php:96
-#: inc/main/classes/class-aarambha-ds-core.php:111
+#: inc/main/classes/class-aarambha-ds-core.php:51
+#: inc/main/classes/class-aarambha-ds-core.php:56
 #: inc/main/classes/class-aarambha-ds-plugins.php:87
 #: inc/main/classes/class-aarambha-ds-plugins.php:102
-#: inc/main/ui/class-aarambha-ds-admin.php:85
-#: inc/main/ui/class-aarambha-ds-admin.php:100
+#: inc/main/ui/class-aarambha-ds-admin.php:86
+#: inc/main/ui/class-aarambha-ds-admin.php:101
 msgid "Cheatin&#8217; huh?"
 msgstr ""
 
-#: inc/main/class-aarambha-ds.php:140
-#: inc/main/class-aarambha-ds.php:141
+#: inc/main/class-aarambha-ds.php:127
+#: inc/main/class-aarambha-ds.php:128
 #: inc/views/body.php:113
 msgid "Import Demo"
 msgstr ""
 
-#: inc/main/class-aarambha-ds.php:232
+#. translators: 1: author URL, 2: author name, 3: plugin name
+#: inc/main/class-aarambha-ds.php:259
 #, php-format
-msgid "<p>You need to have one of the themes from <a href=\"%1$s\" target=\"_blank\">%2$s</a> installed, to use <strong>%3$s</strong> plugin</p>"
+msgid "You need to have one of the themes from <a href=\"%1$s\" target=\"_blank\">%2$s</a> installed to use <strong>%3$s</strong> plugin"
 msgstr ""
 
-#: inc/main/classes/class-aarambha-ds-ajax.php:163
-#: inc/main/classes/class-aarambha-ds-ajax.php:213
-#: inc/main/classes/class-aarambha-ds-ajax.php:238
-#: inc/main/classes/class-aarambha-ds-ajax.php:265
-#: inc/main/classes/class-aarambha-ds-ajax.php:278
-#: inc/main/classes/class-aarambha-ds-ajax.php:316
-#: inc/main/classes/class-aarambha-ds-ajax.php:349
-#: inc/main/classes/class-aarambha-ds-ajax.php:386
-#: inc/main/classes/class-aarambha-ds-ajax.php:406
-#: inc/main/classes/class-aarambha-ds-ajax.php:461
-#: inc/main/classes/class-aarambha-ds-ajax.php:510
-#: inc/main/classes/class-aarambha-ds-ajax.php:559
-#: inc/main/classes/class-aarambha-ds-ajax.php:614
-#: inc/main/classes/class-aarambha-ds-ajax.php:657
-#: inc/main/classes/class-aarambha-ds-ajax.php:748
-#: inc/main/ui/class-aarambha-ds-admin.php:381
+#: inc/main/classes/class-aarambha-ds-ajax.php:142
+#: inc/main/classes/class-aarambha-ds-ajax.php:215
+#: inc/main/classes/class-aarambha-ds-ajax.php:229
+#: inc/main/classes/class-aarambha-ds-ajax.php:247
+#: inc/main/classes/class-aarambha-ds-ajax.php:290
+#: inc/main/ui/class-aarambha-ds-admin.php:467
 msgid "Sorry!"
 msgstr ""
 
-#: inc/main/classes/class-aarambha-ds-ajax.php:164
-#: inc/main/classes/class-aarambha-ds-ajax.php:214
-#: inc/main/classes/class-aarambha-ds-ajax.php:239
-#: inc/main/classes/class-aarambha-ds-ajax.php:266
-#: inc/main/classes/class-aarambha-ds-ajax.php:279
-#: inc/main/classes/class-aarambha-ds-ajax.php:317
-#: inc/main/classes/class-aarambha-ds-ajax.php:350
-#: inc/main/classes/class-aarambha-ds-ajax.php:387
-#: inc/main/classes/class-aarambha-ds-ajax.php:407
-#: inc/main/classes/class-aarambha-ds-ajax.php:462
-#: inc/main/classes/class-aarambha-ds-ajax.php:511
-#: inc/main/classes/class-aarambha-ds-ajax.php:560
-#: inc/main/classes/class-aarambha-ds-ajax.php:615
-#: inc/main/classes/class-aarambha-ds-ajax.php:658
-#: inc/main/classes/class-aarambha-ds-ajax.php:749
+#: inc/main/classes/class-aarambha-ds-ajax.php:143
 msgid "This action cannot be performed now. Please try again later!"
+msgstr ""
+
+#: inc/main/classes/class-aarambha-ds-ajax.php:190
+msgid "Error"
+msgstr ""
+
+#: inc/main/classes/class-aarambha-ds-ajax.php:191
+msgid "Failed to retrieve demo."
+msgstr ""
+
+#: inc/main/classes/class-aarambha-ds-ajax.php:216
+#: inc/main/classes/class-aarambha-ds-ajax.php:327
+msgid "Failed to retrieve demo data."
+msgstr ""
+
+#: inc/main/classes/class-aarambha-ds-ajax.php:230
+msgid "This demo does not contain any plugins to install."
+msgstr ""
+
+#: inc/main/classes/class-aarambha-ds-ajax.php:248
+msgid "Plugin installation failed."
+msgstr ""
+
+#: inc/main/classes/class-aarambha-ds-ajax.php:291
+msgid "Plugin activation failed."
+msgstr ""
+
+#: inc/main/classes/class-aarambha-ds-ajax.php:305
+msgid "Permission denied"
+msgstr ""
+
+#: inc/main/classes/class-aarambha-ds-ajax.php:306
+msgid "Invalid or missing nonce for prepare-import."
+msgstr ""
+
+#: inc/main/classes/class-aarambha-ds-ajax.php:326
+msgid "Error!"
+msgstr ""
+
+#: inc/main/classes/class-aarambha-ds-ajax.php:337
+#: inc/main/classes/class-aarambha-ds-ajax.php:357
+msgid "Error preparing import"
+msgstr ""
+
+#: inc/main/classes/class-aarambha-ds-ajax.php:338
+msgid "An exception occurred while preparing import files. Check server logs for details."
+msgstr ""
+
+#: inc/main/classes/class-aarambha-ds-ajax.php:358
+msgid "Failed to prepare import files. Check error logs for details."
+msgstr ""
+
+#: inc/main/classes/class-aarambha-ds-ajax.php:378
+msgid "No content file provided for import."
+msgstr ""
+
+#: inc/main/classes/class-aarambha-ds-ajax.php:400
+msgid "Import Failed"
+msgstr ""
+
+#: inc/main/classes/class-aarambha-ds-ajax.php:409
+#: inc/main/classes/class-aarambha-ds-ajax.php:461
+#: inc/main/classes/class-aarambha-ds-ajax.php:503
+#: inc/main/classes/class-aarambha-ds-ajax.php:542
+#: inc/main/classes/class-aarambha-ds-ajax.php:585
+#: inc/main/classes/class-aarambha-ds-ajax.php:617
+#: inc/main/classes/class-aarambha-ds-ajax.php:711
+msgid "Import Error"
+msgstr ""
+
+#: inc/main/classes/class-aarambha-ds-ajax.php:410
+msgid "Steps index out of range after content import."
+msgstr ""
+
+#: inc/main/classes/class-aarambha-ds-ajax.php:462
+#: inc/main/classes/class-aarambha-ds-ajax.php:504
+msgid "Steps index out of range after customizer import."
+msgstr ""
+
+#: inc/main/classes/class-aarambha-ds-ajax.php:480
+msgid "Customizer Import Error"
+msgstr ""
+
+#: inc/main/classes/class-aarambha-ds-ajax.php:482
+#, php-format
+msgid "Customizer file not found: %s"
+msgstr ""
+
+#: inc/main/classes/class-aarambha-ds-ajax.php:494
+msgid "Customizer Import Failed"
+msgstr ""
+
+#: inc/main/classes/class-aarambha-ds-ajax.php:543
+msgid "Steps index out of range after widget import."
+msgstr ""
+
+#: inc/main/classes/class-aarambha-ds-ajax.php:586
+msgid "Steps index out of range after slider import."
+msgstr ""
+
+#: inc/main/classes/class-aarambha-ds-ajax.php:618
+msgid "Steps index out of range after menu import."
+msgstr ""
+
+#: inc/main/classes/class-aarambha-ds-ajax.php:712
+msgid "Steps index out of range after pages import."
 msgstr ""
 
 #: inc/main/classes/class-aarambha-ds-api.php:169
@@ -109,15 +192,21 @@ msgstr ""
 msgid "No data received. May be data is malformed."
 msgstr ""
 
-#: inc/main/classes/class-aarambha-ds-core.php:316
-msgid "Import failed. Please check the WXR file and try again."
+#: inc/main/classes/class-aarambha-ds-core.php:207
+msgid "WordPress Importer plugin is required but not available."
 msgstr ""
 
-#: inc/main/classes/class-aarambha-ds-core.php:322
-msgid "Importing Options"
+#. translators: %s: file path
+#: inc/main/classes/class-aarambha-ds-core.php:217
+#, php-format
+msgid "Import file not found: %s"
 msgstr ""
 
-#: inc/main/classes/class-aarambha-ds-plugins.php:424
+#: inc/main/classes/class-aarambha-ds-core.php:252
+msgid "Content imported successfully."
+msgstr ""
+
+#: inc/main/classes/class-aarambha-ds-plugins.php:395
 msgid "Unable to connect to the filesystem. Please confirm your credentials."
 msgstr ""
 
@@ -149,399 +238,144 @@ msgstr ""
 msgid "No Title"
 msgstr ""
 
-#: inc/main/classes/customize/class-aarambha-ds-customize-importer.php:34
+#: inc/main/classes/customize/class-aarambha-ds-customize-importer.php:32
+msgid "The customizer import file does not exist or is not readable."
+msgstr ""
+
+#: inc/main/classes/customize/class-aarambha-ds-customize-importer.php:44
 msgid "The customizer import file is not in a correct format. Please make sure to use the correct customizer import file."
 msgstr ""
 
-#: inc/main/classes/wordpress-importer/class-wp-import.php:151
-msgid "URL rewriting requires WordPress 6.7 or newer. The import will continue without rewriting URLs."
+#: inc/main/classes/customize/class-aarambha-ds-customize-importer.php:165
+msgid "Could not parse image URL."
 msgstr ""
 
-#: inc/main/classes/wordpress-importer/class-wp-import.php:183
-#: inc/main/classes/wordpress-importer/class-wp-import.php:194
-#: inc/main/classes/wordpress-importer/class-wp-import.php:268
-#: inc/main/classes/wordpress-importer/class-wp-import.php:272
-#: inc/main/classes/wordpress-importer/class-wp-import.php:283
-msgid "Sorry, there has been an error."
+#: inc/main/ui/class-aarambha-ds-admin.php:140
+msgid "Max Execution Time"
 msgstr ""
 
-#: inc/main/classes/wordpress-importer/class-wp-import.php:184
-msgid "The file does not exist, please try again."
+#: inc/main/ui/class-aarambha-ds-admin.php:143
+#: inc/main/ui/class-aarambha-ds-admin.php:149
+msgid "s"
 msgstr ""
 
-#: inc/main/classes/wordpress-importer/class-wp-import.php:252
-msgid "All done."
+#: inc/main/ui/class-aarambha-ds-admin.php:146
+msgid "Max Input Time"
 msgstr ""
 
-#: inc/main/classes/wordpress-importer/class-wp-import.php:252
-msgid "Have fun!"
+#: inc/main/ui/class-aarambha-ds-admin.php:152
+msgid "Memory Limit"
 msgstr ""
 
-#: inc/main/classes/wordpress-importer/class-wp-import.php:253
-msgid "Remember to update the passwords and roles of imported users."
+#: inc/main/ui/class-aarambha-ds-admin.php:178
+msgid "Demo Importer: Server Configuration Warning"
 msgstr ""
 
-#: inc/main/classes/wordpress-importer/class-wp-import.php:273
+#: inc/main/ui/class-aarambha-ds-admin.php:181
+msgid "Your server's current PHP settings may cause the demo import to fail or time out. Recommended minimum values:"
+msgstr ""
+
+#: inc/main/ui/class-aarambha-ds-admin.php:186
+msgid "Setting"
+msgstr ""
+
+#: inc/main/ui/class-aarambha-ds-admin.php:187
+msgid "Current Value"
+msgstr ""
+
+#: inc/main/ui/class-aarambha-ds-admin.php:188
+msgid "Recommended"
+msgstr ""
+
+#. translators: %s: link to WordPress wp-config editing guide
+#: inc/main/ui/class-aarambha-ds-admin.php:207
 #, php-format
-msgid "The export file could not be found at <code>%s</code>. It is likely that this was caused by a permissions problem."
+msgid "Please ask your hosting provider to increase these values, or update them yourself. %s"
 msgstr ""
 
-#: inc/main/classes/wordpress-importer/class-wp-import.php:291
-#, php-format
-msgid "This WXR file (version %s) may not be supported by this version of the importer. Please consider updating."
+#: inc/main/ui/class-aarambha-ds-admin.php:208
+msgid "Learn how"
 msgstr ""
 
-#: inc/main/classes/wordpress-importer/class-wp-import.php:316
-#, php-format
-msgid "Failed to import author %s. Their posts will be attributed to the current user."
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:344
-msgid "Assign Authors"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:345
-msgid "To make it simpler for you to edit and save the imported content, you may want to reassign the author of the imported item to an existing user of this site, such as your primary administrator account."
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:347
-#, php-format
-msgid "If a new user is created by WordPress, a new password will be randomly generated and the new user&#8217;s role will be set as %s. Manually changing the new user&#8217;s details will be necessary."
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:357
-msgid "Import Attachments"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:360
-msgid "Download and import file attachments"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:364
-msgid "Content Options"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:367
-msgid "Change all imported URLs that currently link to the previous site so that they now link to this site"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:370
-msgid "Submit"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:384
-msgid "Import author:"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:399
-msgid "or create new user with login name:"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:402
-msgid "as a new user:"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:412
-msgid "assign posts to an existing user:"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:414
-msgid "or assign posts to an existing user:"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:423
-msgid "- Select -"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:482
-#, php-format
-msgid "Failed to create new user for %s. Their posts will be attributed to the current user."
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:551
-#, php-format
-msgid "Failed to import category %s"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:624
-#, php-format
-msgid "Failed to import post tag %s"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:703
-#: inc/main/classes/wordpress-importer/class-wp-import.php:1205
-#, php-format
-msgid "Failed to import %1$s %2$s"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:794
-#, php-format
-msgid "Failed to import &#8220;%1$s&#8221;: Invalid post type %2$s"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:835
-#, php-format
-msgid "%1$s &#8220;%2$s&#8221; already exists."
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:930
-#, php-format
-msgid "Failed to import %1$s &#8220;%2$s&#8221;"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:1253
-msgid "Menu item skipped due to missing menu slug"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:1260
-#, php-format
-msgid "Menu item skipped due to invalid menu slug: %s"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:1327
-msgid "Fetching attachments is not enabled"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:1345
-msgid "Invalid file type"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:1389
-msgid "Could not create temporary file."
-msgstr ""
-
-#. translators: 1: The WordPress error message. 2: The WordPress error code.
-#: inc/main/classes/wordpress-importer/class-wp-import.php:1411
-#, php-format
-msgid "Request failed due to an error: %1$s (%2$s)"
-msgstr ""
-
-#. translators: 1: The HTTP error message. 2: The HTTP error code.
-#: inc/main/classes/wordpress-importer/class-wp-import.php:1427
-#, php-format
-msgid "Remote server returned the following unexpected result: %1$s (%2$s)"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:1439
-msgid "Remote server did not respond"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:1446
-msgid "Zero size file downloaded"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:1451
-msgid "Downloaded file has incorrect size"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:1457
-#, php-format
-msgid "Remote file is too large, limit is %s"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:1489
-msgid "Sorry, this file type is not permitted for security reasons."
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:1504
-msgid "The uploaded file could not be moved"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:1684
-msgid "Import WordPress"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:1691
-#, php-format
-msgid "A new version of this importer is available. Please update to version %s to ensure compatibility with newer export files."
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:1706
-msgid "Howdy! Upload your WordPress eXtended RSS (WXR) file and we&#8217;ll import the posts, pages, comments, custom fields, categories, and tags into this site."
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/class-wp-import.php:1707
-msgid "Choose a WXR (.xml) file to upload, then click Upload file and import."
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/parsers/class-wxr-parser-regex.php:104
-#: inc/main/classes/wordpress-importer/parsers/class-wxr-parser-simplexml.php:46
-#: inc/main/classes/wordpress-importer/parsers/class-wxr-parser-simplexml.php:52
-#: inc/main/classes/wordpress-importer/parsers/class-wxr-parser-xml-processor.php:190
-#: inc/main/classes/wordpress-importer/parsers/class-wxr-parser-xml.php:106
-msgid "This does not appear to be a WXR file, missing/invalid WXR version number"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/parsers/class-wxr-parser-simplexml.php:33
-#: inc/main/classes/wordpress-importer/parsers/class-wxr-parser-simplexml.php:41
-#: inc/main/classes/wordpress-importer/parsers/class-wxr-parser.php:68
-msgid "There was an error when reading this WXR file"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/parsers/class-wxr-parser.php:27
-#: inc/main/classes/wordpress-importer/parsers/class-wxr-parser.php:28
-#, php-format
-msgid "Invalid parser specified: %s"
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/parsers/class-wxr-parser.php:69
-msgid "Details are shown above. The importer will now try again with a different parser..."
-msgstr ""
-
-#. translators: %s: XMLProcessor::create_fragment().
-#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:883
-#, php-format
-msgid "Call %s to create an XML Processor instead of calling the constructor directly."
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:911
-msgid "Cannot append bytes after the last input chunk was provided and input_finished() was called."
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:1463
-msgid "Too many bookmarks: cannot create any more."
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:1570
-msgid "Please pass a query array to this function."
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:1598
-msgid "Cannot visit tag closers in XML Processor."
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:1614
-msgid "Breadcrumbs must be an array of strings or two-tuples of (namespace, local name)."
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:2670
-msgid "Unknown bookmark name."
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:2680
-msgid "Too many calls to seek() - this can lead to performance issues."
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:2857
-#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:2896
-msgid "Invalid attribute value encountered."
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:3363
-msgid "Invalid text content encountered."
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:3412
-msgid "Cannot set text content on a non-text node."
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:3440
-msgid "Non-string attribute values cannot be passed to set_attribute()."
-msgstr ""
-
-#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:3448
-msgid "Setting attributes in the xmlns namespace is not yet supported by set_attribute()."
-msgstr ""
-
-#. Translators: 1: The XML namespace.
-#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:3467
-#, php-format
-msgid "The namespace \"%1$s\" is not in the current element's scope."
-msgstr ""
-
-#. Translators: 1: The closing tag name. 2: The opening tag name.
-#. translators: %1$s is the name of the closing HTML tag, %2$s is the name of the opening HTML tag.
-#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:3830
-#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:3842
-#, php-format
-msgid "The closing tag \"%1$s\" did not match the opening tag \"%2$s\"."
-msgstr ""
-
-#. translators: %1$s is the unexpected token type.
-#: inc/main/classes/wordpress-importer/php-toolkit/XML/class-xmlprocessor.php:3862
-#, php-format
-msgid "Unexpected token type \"%1$s\" in element stage."
-msgstr ""
-
-#: inc/main/ui/class-aarambha-ds-admin.php:372
+#: inc/main/ui/class-aarambha-ds-admin.php:458
 msgid "You're Offline!"
 msgstr ""
 
-#: inc/main/ui/class-aarambha-ds-admin.php:373
+#: inc/main/ui/class-aarambha-ds-admin.php:459
 msgid "Purchase Now"
 msgstr ""
 
-#: inc/main/ui/class-aarambha-ds-admin.php:374
+#: inc/main/ui/class-aarambha-ds-admin.php:460
 msgid "Preview"
 msgstr ""
 
-#: inc/main/ui/class-aarambha-ds-admin.php:375
+#: inc/main/ui/class-aarambha-ds-admin.php:461
 msgid "Please Wait!"
 msgstr ""
 
-#: inc/main/ui/class-aarambha-ds-admin.php:376
+#: inc/main/ui/class-aarambha-ds-admin.php:462
 msgid "Install Plugins"
 msgstr ""
 
-#: inc/main/ui/class-aarambha-ds-admin.php:377
+#: inc/main/ui/class-aarambha-ds-admin.php:463
 msgid "Import Content"
 msgstr ""
 
-#: inc/main/ui/class-aarambha-ds-admin.php:378
+#: inc/main/ui/class-aarambha-ds-admin.php:464
 msgid "Installing &#8230;"
 msgstr ""
 
-#: inc/main/ui/class-aarambha-ds-admin.php:379
+#: inc/main/ui/class-aarambha-ds-admin.php:465
 msgid "Activating &#8230;"
 msgstr ""
 
-#: inc/main/ui/class-aarambha-ds-admin.php:380
+#: inc/main/ui/class-aarambha-ds-admin.php:466
 #: inc/views/plugins-list.php:32
 #: inc/views/plugins-list.php:73
 msgid "Active"
 msgstr ""
 
-#: inc/main/ui/class-aarambha-ds-admin.php:383
+#: inc/main/ui/class-aarambha-ds-admin.php:469
 msgid "We cannot import now. Please try again later!"
 msgstr ""
 
-#: inc/main/ui/class-aarambha-ds-admin.php:384
+#: inc/main/ui/class-aarambha-ds-admin.php:474
 msgid "Refresh the page, and try again!"
 msgstr ""
 
-#: inc/main/ui/class-aarambha-ds-admin.php:385
+#: inc/main/ui/class-aarambha-ds-admin.php:478
 msgid "Importing Content&#8230;"
 msgstr ""
 
-#: inc/main/ui/class-aarambha-ds-admin.php:386
+#: inc/main/ui/class-aarambha-ds-admin.php:482
 msgid "Importing Customize Information &#8230;"
 msgstr ""
 
-#: inc/main/ui/class-aarambha-ds-admin.php:387
+#: inc/main/ui/class-aarambha-ds-admin.php:486
 msgid "Importing Widgets &#8230;"
 msgstr ""
 
-#: inc/main/ui/class-aarambha-ds-admin.php:388
+#: inc/main/ui/class-aarambha-ds-admin.php:490
 msgid "Importing Slider &#8230;"
 msgstr ""
 
-#: inc/main/ui/class-aarambha-ds-admin.php:389
+#: inc/main/ui/class-aarambha-ds-admin.php:494
 msgid "Something Went Wrong!"
 msgstr ""
 
-#: inc/main/ui/class-aarambha-ds-admin.php:390
+#: inc/main/ui/class-aarambha-ds-admin.php:498
 msgid "Preparing to import &#8230;"
 msgstr ""
 
-#: inc/main/ui/class-aarambha-ds-admin.php:391
+#: inc/main/ui/class-aarambha-ds-admin.php:502
 msgid "Setting Menus &#8230;"
 msgstr ""
 
-#: inc/main/ui/class-aarambha-ds-admin.php:392
+#: inc/main/ui/class-aarambha-ds-admin.php:506
 msgid "Setting Pages &#8230;"
 msgstr ""
 
-#: inc/main/ui/class-aarambha-ds-admin.php:393
+#: inc/main/ui/class-aarambha-ds-admin.php:510
 msgid "Finalizing the Import &#8230;"
 msgstr ""
 
@@ -557,7 +391,7 @@ msgstr ""
 msgid "Pro"
 msgstr ""
 
-#: inc/views/body.php:131
+#: inc/views/body.php:132
 msgid "No demos found for theme. Please try again later."
 msgstr ""
 
