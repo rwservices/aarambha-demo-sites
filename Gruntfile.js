@@ -2,35 +2,64 @@ module.exports = function( grunt ) {
 	require( 'load-grunt-tasks' )( grunt );
 
 	const copyFiles = [
-		'**', // include everything
-		'!node_modules/**', // exclude node_modules
-		'!vendor/**', // exclude vendor directory
-		'!assets/src/**', // exclude source assets/src
-		'!cypress/**', // exclude Cypress tests
-		'!tests/**', // exclude unit tests
-		'!build/**', // exclude build output
-		'!.git/**', // exclude git directory
-		'!.gitignore', // exclude git config
-		'!package.json', // exclude lock files
-		'!package-lock.json', // exclude lock files
-		'!composer.json', // exclude lock files
-		'!composer.lock',
-		'!*.config.js', // exclude config files used only for development
-		'!Gruntfile.js', // exclude this build file
-		'!webpack.config.js',
-		'!babel.config.js',
-		'!postcss.config.js',
-		'!tailwind.config.js',
+		'**', // include everything, then prune what should not ship
+
+		// Dependencies & build artifacts
+		'!node_modules/**',
+		'!vendor/**', // no runtime composer deps; autoloader is not loaded
+		'!build/**', // packaging output
+		'!assets/src/**', // un-built source assets
+
+		// Version control & CI
+		'!.git/**',
+		'!.github/**',
+		'!.gitignore',
+		'!.gitattributes',
+		'!.wordpress-org/**', // wordpress.org SVN assets (banner/icon/screenshots)
+
+		// Tests
+		'!cypress/**',
 		'!cypress.config.js',
-		'!phpcs.xml.dist', // exclude linting configs
+		'!tests/**',
+
+		// Dev tooling / editor config
+		'!.claude/**',
+		'!.vscode/**',
+		'!.idea/**',
+		'!*.config.js', // webpack/babel/postcss/tailwind/etc.
+		'!Gruntfile.js',
+		'!.editorconfig',
+		'!.browserslistrc',
+		'!.nvmrc',
+		'!.eslintrc*',
+		'!.eslintignore',
+		'!.stylelintrc*',
+		'!.stylelintignore',
+		'!.prettierrc*',
+		'!.prettierignore',
+
+		// Package manifests & lock files (dev-only)
+		'!package.json',
+		'!package-lock.json',
+		'!composer.json',
+		'!composer.lock',
+
+		// Lint / static-analysis config
+		'!phpcs.xml',
+		'!phpcs.xml.dist',
+		'!phpstan.neon',
 		'!phpstan.neon.dist',
+		'!phpunit.xml',
 		'!phpunit.xml.dist',
-		'!**/*.map', // exclude source maps
-		'!**/.DS_Store', // exclude macOS metadata
-		'!**/*.tmp', // exclude temporary files
-		'!CLAUDE.md', // exclude CLAUDE.md
-		'!AGENTS.md', // exclude AGENTS.md
-		'CHANGELOG.md', // include CHANGELOG.md
+
+		// Agent / contributor docs
+		'!CLAUDE.md',
+		'!AGENTS.md',
+
+		// Junk
+		'!**/*.map', // source maps
+		'!**/.DS_Store',
+		'!**/*.tmp',
 	];
 
 	// Project configuration
@@ -44,13 +73,8 @@ module.exports = function( grunt ) {
 				dot: true,
 				filter: 'isFile',
 			},
-			// Clean all build directories in assets folder and subfolders
-			assets: {
-				src: [
-					'build/**', // All build directories in assets
-				],
-			},
-			folder_v2: [ 'build/**' ],
+			// Previous packaging output (staged folder + zip).
+			build: [ 'build/**' ],
 		},
 
 		// Check text domain for WordPress i18n
@@ -76,8 +100,8 @@ module.exports = function( grunt ) {
 			},
 			files: {
 				src: [
+					'*.php',
 					'inc/**/*.php',
-					'!core/external/**', // Exclude external libs
 				],
 				expand: true,
 			},
@@ -107,23 +131,38 @@ module.exports = function( grunt ) {
 				dest: '<%= pkg.name %>/',
 			},
 		},
-
-		// Search task configuration (if needed)
-		search: {
-			version: {
-				files: {
-					src: [ '*.php', 'inc/**/*.php' ],
-				},
-				options: {
-					searchString: /Version:\s*(\d+\.\d+\.\d+)/,
-					logFormat: 'console',
-				},
-			},
-		},
 	} );
 
-	// Register tasks
-	grunt.registerTask( 'version-compare', [ 'search:version' ] );
+	// Report the version string declared in each place it lives, and flag any
+	// that disagree with package.json. Dependency-free so it always runs.
+	grunt.registerTask( 'version-compare', function() {
+		const read = ( file ) => grunt.file.exists( file ) ? grunt.file.read( file ) : '';
+		const pkgVersion = grunt.file.readJSON( 'package.json' ).version;
+
+		const sources = {
+			'package.json': pkgVersion,
+			'aarambha-demo-sites.php (header)':
+				( read( 'aarambha-demo-sites.php' ).match( /^\s*\*\s*Version:\s*(.+)$/m ) || [] )[ 1 ],
+			'inc/helpers/constant.php (AARAMBHA_DS_VERSION)':
+				( read( 'inc/helpers/constant.php' ).match( /AARAMBHA_DS_VERSION['"]\s*,\s*['"]([^'"]+)/ ) || [] )[ 1 ],
+			'readme.txt (Stable tag)':
+				( read( 'readme.txt' ).match( /^Stable tag:\s*(.+)$/m ) || [] )[ 1 ],
+		};
+
+		let mismatch = false;
+		Object.keys( sources ).forEach( ( label ) => {
+			const value = ( sources[ label ] || '' ).trim() || '(not found)';
+			const ok = value === pkgVersion;
+			if ( ! ok ) {
+				mismatch = true;
+			}
+			grunt.log.writeln( `${ ok ? '[ok]  ' : '[diff]' } ${ label }: ${ value }` );
+		} );
+
+		if ( mismatch ) {
+			grunt.fail.warn( `Version strings disagree with package.json (${ pkgVersion }).` );
+		}
+	} );
 	grunt.registerTask( 'finish', function() {
 		const json = grunt.file.readJSON( 'package.json' );
 		const file = `./build/${ json.name }-${ json.version }.zip`;
@@ -142,8 +181,7 @@ module.exports = function( grunt ) {
 	// Pre-build clean task
 	grunt.registerTask( 'preBuildClean', [
 		'clean:temp',
-		'clean:assets',
-		'clean:folder_v2',
+		'clean:build',
 	] );
 
 	// release task
