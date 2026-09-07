@@ -17,7 +17,7 @@ $plugin_bootstrap = AARAMBHA_BOOTSTRAP;
 $plugin_root      = wp_normalize_path(plugin_dir_path($plugin_bootstrap));
 $plugin_uri       = plugin_dir_url($plugin_bootstrap);
 
-define('AARAMBHA_DS_VERSION', '2.0.0');
+define('AARAMBHA_DS_VERSION', '2.0.1');
 
 /**
  * Core constants to be overridden by individual theme.

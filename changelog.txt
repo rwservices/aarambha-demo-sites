@@ -1,5 +1,15 @@
 == Changelog ==
 
+= 2.0.1 - September 07 2026 =
+* Fixed demo import failing part-way with a "Gateway Time-out / Something Went Wrong!" error on demos with many images: attachments are now downloaded in small batches before the content import runs, so no single request outlasts the web server timeout.
+* Fixed a fatal error that stopped every content import before it started (invalid parent constructor call in the WordPress Importer wrapper).
+* Fixed a fatal error that could break the Plugins screen and other admin pages when a demo's plugin list had not been fetched yet.
+* Fixed required-plugin activation being reported as successful even when activation actually failed.
+* Fixed demo listings showing "No demos found for theme" when the demo server was slow to answer; API requests now wait up to 30 seconds (filterable) and use HTTPS.
+* Fixed front page, blog page and WooCommerce page setup relying on a function deprecated since WordPress 6.2.
+* Fixed a JavaScript error on the import screen when a demo returned no categories.
+* Changed: Customizer import now also imports images nested inside grouped settings such as background-image controls, and recognises WebP files.
+
 = 2.0.0 - August 05 2026 =
 * Deprecated bundled WordPress Importer plugin files and now require it as an external required plugin.
 * Added admin notice showing server PHP settings relevant to the demo importer.

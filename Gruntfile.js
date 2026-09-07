@@ -28,6 +28,9 @@ module.exports = function( grunt ) {
 		'!**/*.map', // exclude source maps
 		'!**/.DS_Store', // exclude macOS metadata
 		'!**/*.tmp', // exclude temporary files
+		'!CLAUDE.md', // exclude CLAUDE.md
+		'!AGENTS.md', // exclude AGENTS.md
+		'CHANGELOG.md', // include CHANGELOG.md
 	];
 
 	// Project configuration
