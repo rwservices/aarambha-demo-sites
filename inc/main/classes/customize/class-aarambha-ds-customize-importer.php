@@ -110,6 +110,14 @@ class Aarambha_DS_Customize_Importer {
 	 */
 	private static function import_customizer_images( $mods ) {
 		foreach ( $mods as $key => $value ) {
+			// Many theme mods store the image URL inside a nested array
+			// (e.g. background-image controls: array( 'background-image' => 'https://…/bg.png' )).
+			// Recurse so those get sideloaded too.
+			if ( is_array( $value ) ) {
+				$mods[ $key ] = self::import_customizer_images( $value );
+				continue;
+			}
+
 			if ( self::is_image_url( $value ) ) {
 				$data = self::media_handle_sideload( $value );
 				if ( ! is_wp_error( $data ) ) {
@@ -134,7 +142,7 @@ class Aarambha_DS_Customize_Importer {
 	 * @return bool Whether the url is an image url or not.
 	 */
 	private static function is_image_url( $url ) {
-		if ( is_string( $url ) && preg_match( '/\.(jpg|jpeg|png|gif)/i', $url ) ) {
+		if ( is_string( $url ) && preg_match( '#^https?://#i', $url ) && preg_match( '/\.(jpg|jpeg|png|gif|webp)/i', $url ) ) {
 			return true;
 		}
 

@@ -1,13 +1,14 @@
 {
-	"name": "rabindratharu/zenvy",
+	"name": "rwservices/aarambha-demo-sites",
 	"type": "wordpress-plugin",
-	"description": "A WordPress plugin with a custom post type, meta fields, shortcode, and REST API settings.",
+	"description": "Aarambha Demo Sites - a WordPress demo importer plugin for importing Aarambha Themes demo content, widgets and settings with one click.",
 	"keywords": [
 		"wordpress",
-		"plugin"
+		"plugin",
+		"demo-importer"
 	],
 	"license": "GPL-2.0-or-later",
-	"homepage": "https://rabindratharu.com/zenvy",
+	"homepage": "https://aarambhathemes.com/",
 	"authors": [
 		{
 			"name": "Rabindra Tharu",
@@ -39,7 +40,7 @@
 	},
     "autoload-dev": {
 		"psr-4": {
-			"Zenvy\\Tests\\": "tests/"
+			"Aarambha_Demo_Sites\\Tests\\": "tests/"
 		}
 	},
 	"repositories": [
@@ -81,8 +82,8 @@
 		"test-multisite": "WP_MULTISITE=1 phpunit --exclude-group=ms-excluded"
 	},
     "support": {
-		"issues": "https://github.com/rwservices/zenvy/issues",
-		"source": "https://github.com/rwservices/zenvy",
-		"docs": "https://github.com/rwservices/zenvy#readme"
+		"issues": "https://github.com/rwservices/aarambha-demo-sites/issues",
+		"source": "https://github.com/rwservices/aarambha-demo-sites",
+		"docs": "https://github.com/rwservices/aarambha-demo-sites#readme"
 	}
 }

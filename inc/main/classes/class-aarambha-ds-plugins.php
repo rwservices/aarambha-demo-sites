@@ -304,13 +304,12 @@ class Aarambha_DS_Plugins
             return false;
         }
 
+        // activate_plugin() returns null on success and a WP_Error on failure.
+        // The previous condition (!is_wp_error || null !== $status) was always
+        // true, so activation failures were reported as success.
         $status = activate_plugin($plugin);
 
-        if (!is_wp_error($status) || null !== $status) {
-            return true;
-        }
-
-        return false;
+        return !is_wp_error($status);
     }
 
 
@@ -361,8 +360,8 @@ class Aarambha_DS_Plugins
         $result   = $upgrader->install($api->download_link);
 
         if (defined('WP_DEBUG') && WP_DEBUG) {
-            $status['success'] = false;
-
+            // Expose the upgrader log for debugging, but do NOT flip success
+            // here — that is decided by the error checks below.
             $status['debug'] = $skin->get_upgrade_messages();
         }
 
@@ -414,6 +413,13 @@ class Aarambha_DS_Plugins
     {
         $proPlugins = get_site_transient('aarambha_ds_plugins');
         $theme = aarambha_ds_get_theme();
+
+        // This filter fires for every plugins_api() call in wp-admin. Bail out
+        // unless we actually have pro-plugin data to inject, otherwise reading
+        // $proPlugins->plugins on a bool/incomplete object is a fatal error.
+        if (!is_object($proPlugins) || empty($proPlugins->plugins) || !is_array($proPlugins->plugins)) {
+            return $response;
+        }
 
         if ('plugin_information' === $action && isset($args->slug)) {
             $slug = $args->slug;

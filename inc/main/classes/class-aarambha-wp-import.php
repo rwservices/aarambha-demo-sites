@@ -15,7 +15,9 @@ class Aarambha_WP_Import extends WP_Import
 
     public function __construct()
     {
-        parent::__construct();
+        // NOTE: Neither WP_Import nor its parent WP_Importer defines a
+        // constructor, so calling parent::__construct() here is a fatal
+        // "Cannot call constructor" error. Just wire up our own hook.
         add_action('import_end', [$this, 'afterImportComplete']);
     }
 

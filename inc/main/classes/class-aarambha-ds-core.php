@@ -193,10 +193,14 @@ class Aarambha_DS_Core
     /**
      * Imports WordPress content from a WXR file.
      *
-     * @param  string $file Absolute path to the WXR (.xml) file.
+     * @param  string $file           Absolute path to the WXR (.xml) file.
+     * @param  string $media_cache_dir Optional. Directory holding pre-downloaded
+     *                                 attachment files. When given, remote media
+     *                                 fetches are served from that cache so the
+     *                                 import does not stall on network I/O.
      * @return array  Result array with 'action' and 'message' keys.
      */
-    public function content($file)
+    public function content($file, $media_cache_dir = '')
     {
         // Obtain a fresh WP importer instance from the main plugin class.
         $importer = Aarambha_DS()->importer();
@@ -221,6 +225,13 @@ class Aarambha_DS_Core
             ];
         }
 
+        $use_cache = ('' !== $media_cache_dir && is_dir($media_cache_dir));
+
+        if ($use_cache) {
+            require_once AARAMBHA_DS_CLASSES . 'importer/class-aarambha-ds-media-cache.php';
+            Aarambha_DS_Media_Cache::attach_interceptor($media_cache_dir);
+        }
+
         try {
             $importer->fetch_attachments = true;
 
@@ -229,6 +240,10 @@ class Aarambha_DS_Core
             $result = $importer->import($file);
 
             do_action('aarambha_ds_after_content_import', $importer);
+
+            if ($use_cache) {
+                Aarambha_DS_Media_Cache::detach_interceptor();
+            }
 
             // parent::import() may return a WP_Error or boolean. Treat non-falsey as success.
             if (is_wp_error($result)) {
@@ -256,6 +271,10 @@ class Aarambha_DS_Core
             ];
 
         } catch (Exception $e) {
+            if ($use_cache) {
+                Aarambha_DS_Media_Cache::detach_interceptor();
+            }
+
             return [
                 'action'  => 'terminate',
                 'message' => $e->getMessage(),

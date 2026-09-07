@@ -186,8 +186,42 @@ function aarambha_ds_error_log($message = '')
 
 
 /**
+ * Find a published page by its title.
+ *
+ * Replacement for get_page_by_title(), which is deprecated since WordPress 6.2
+ * and slated for removal. Used by the importer to wire up the front page, blog
+ * page and WooCommerce pages after content import.
+ *
+ * @since 2.0.0
+ *
+ * @param  string $title     Page title to match.
+ * @param  string $post_type Post type to search. Default 'page'.
+ * @return WP_Post|null       The matching post object, or null when not found.
+ */
+function aarambha_ds_get_page_by_title($title, $post_type = 'page')
+{
+    if ('' === trim((string) $title)) {
+        return null;
+    }
+
+    $query = new WP_Query([
+        'post_type'              => $post_type,
+        'title'                  => $title,
+        'post_status'            => ['publish', 'draft', 'pending', 'private', 'future'],
+        'posts_per_page'         => 1,
+        'no_found_rows'          => true,
+        'update_post_meta_cache' => false,
+        'update_post_term_cache' => false,
+        'orderby'                => 'post_date ID',
+        'order'                  => 'ASC',
+    ]);
+
+    return !empty($query->posts) ? $query->posts[0] : null;
+}
+
+/**
  * Recursive sanitation for text or array
- * 
+ *
  * @param $array_or_string (array|string)
  * @since  1.0.0
  * @return mixed

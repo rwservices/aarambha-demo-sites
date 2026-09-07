@@ -35,7 +35,7 @@ if (!defined('AARAMBHA_DS_AUTHOR_URI')) {
 }
 
 if (!defined('AARAMBHA_DS_API_URL')) {
-    define('AARAMBHA_DS_API_URL', 'http://demo.aarambhathemes.com/wp-json/demos/v1/');
+    define('AARAMBHA_DS_API_URL', 'https://demo.aarambhathemes.com/wp-json/demos/v1/');
 }
 
 if ( ! defined( 'AARAMBHA_DS_RTL' ) ) {

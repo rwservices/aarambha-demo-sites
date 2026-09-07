@@ -51,7 +51,12 @@ class Aarambha_DS_API
     {
         if (null === self::$instance) {
             self::$instance = new self();
-            self::$instance->apiUrl = AARAMBHA_DS_API_URL;
+
+            // Use the URL resolved by the main plugin class, which has already
+            // run it through the `aarambha_ds_api_url` filter. Fall back to the
+            // raw constant if the core instance is not ready yet.
+            $url = function_exists('Aarambha_DS') ? Aarambha_DS()->getApiUrl() : '';
+            self::$instance->apiUrl = $url ? $url : AARAMBHA_DS_API_URL;
         }
 
         return self::$instance;
@@ -120,20 +125,33 @@ class Aarambha_DS_API
      *
      * @since 1.0.0
      *
-     * @param  string $url API request URL, including the request method, parameters, & file type.
-     * @param  array  $args The arguments passed to `wp_remote_get`.
-     * 
+     * @param  string $url          API request URL.
+     * @param  array  $query_args    Query-string parameters appended to $url.
+     * @param  array  $request_args  Options passed through to `wp_remote_get()`
+     *                               (e.g. 'timeout', 'headers'). Overrides the
+     *                               defaults set here.
+     *
      * @return array|WP_Error  The HTTP response.
      */
-    public function request($url, $args)
+    public function request($url, $query_args, $request_args = [])
     {
-        $default = [];
+        $query_args = wp_parse_args($query_args, []);
 
-        $args = wp_parse_args($args, $default);
+        $apiUrl = add_query_arg($query_args, $url);
 
-        $apiUrl = add_query_arg($args, $url);
+        /**
+         * The demo API's list/category endpoints regularly take 6+ seconds to
+         * respond, which blows past WordPress' 5 second default and makes every
+         * call fail with "cURL error 28: Operation timed out". Give the request
+         * a much longer ceiling; it is only ever run in wp-admin, behind a
+         * transient cache, never on a front-end request.
+         *
+         * @param int    $timeout Seconds before the HTTP request is aborted.
+         * @param string $apiUrl  The full request URL.
+         */
+        $timeout = apply_filters('aarambha_ds_api_request_timeout', 30, $apiUrl);
 
-        $response = wp_remote_get($apiUrl);
+        $response = wp_remote_get($apiUrl, wp_parse_args($request_args, ['timeout' => $timeout]));
 
         // Check the response code and message.
         $response_code    = wp_remote_retrieve_response_code($response);

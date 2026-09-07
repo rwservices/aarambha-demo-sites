@@ -18,17 +18,16 @@ parameters:
 			min: 80000
 			max: 80400
 		bootstrapFiles:
-				- zenvy.php
+				- aarambha-demo-sites.php
 		paths:
-				- zenvy.php
-				- uninstall.php
+				- aarambha-demo-sites.php
 				- inc/
 		excludePaths:
 			analyse:
 				- tests/
 				- vendor/
 			analyseAndScan:
-				- node_modules (?)
+				- node_modules
 		ignoreErrors:
 			- # Too noisy for now.
 				identifier: missingType.generics

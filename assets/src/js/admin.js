@@ -162,6 +162,12 @@
             var searchInput = document.querySelector('.aarambha-ds--search__input');
             let allThemes = document.querySelectorAll('.theme')
 
+            // The search field is only rendered when the demo browser has
+            // categories/demos to show; bail out quietly otherwise.
+            if (!searchInput) {
+                return
+            }
+
             searchInput.addEventListener('keyup', (e) => {
                 var searchText = e.target.value
 
@@ -749,12 +755,24 @@
                         var actionName = res.data.action
 
                         if ('content-import' == actionName) {
-                            // Carry DOM context forward into recursive call
+                            // The content step re-calls itself while it streams
+                            // the demo's media into a local cache (a few files
+                            // per request), then once more to run the import.
+                            // Keep stepsIndex where it is and repeat.
                             res.data.slug   = slug
                             res.data.target = target
                             res.data.parent = parent
                             response = res.data
-                            aarambhaDS.import(event, response)
+
+                            if (res.data.message) {
+                                $(parent)
+                                    .find('.import-progress--bar')
+                                    .text(res.data.message)
+                            }
+
+                            setTimeout(() => {
+                                aarambhaDS.import(event, response)
+                            }, 400)
                             return
 
                         } else if ('finalized' == actionName) {

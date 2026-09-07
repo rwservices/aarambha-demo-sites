@@ -159,6 +159,39 @@ class Aarambha_DS_Ajax
         return isset($steps[$index]) ? $steps[$index] : null;
     }
 
+    /**
+     * Resolve a demo's data array from the transient cache, falling back to the
+     * API. Sends a JSON error (and stops) when the demo cannot be resolved, so
+     * later steps never operate on a false/null $demo.
+     *
+     * @param  string $slug Demo slug.
+     * @return array
+     */
+    private function resolveDemo($slug)
+    {
+        $demo = Aarambha_DS()->demo($slug);
+
+        if (is_array($demo)) {
+            return $demo;
+        }
+
+        $api_result = Aarambha_DS()->api()->demo($slug);
+
+        if (!empty($api_result['success']) && is_array($api_result['data'])) {
+            $theme   = aarambha_ds_get_theme();
+            $demoKey = "aarambha_ds_{$theme}_demo_{$slug}";
+            set_site_transient($demoKey, ['data' => $api_result['data']], WEEK_IN_SECONDS);
+            return $api_result['data'];
+        }
+
+        $this->sendError([
+            'title'   => esc_html__('Import Error', 'aarambha-demo-sites'),
+            'message' => isset($api_result['message'])
+                ? $api_result['message']
+                : esc_html__('Demo data could not be loaded. Please restart the import.', 'aarambha-demo-sites'),
+        ]);
+    }
+
     // -------------------------------------------------------------------------
     // AJAX handlers
     // -------------------------------------------------------------------------
@@ -344,6 +377,14 @@ class Aarambha_DS_Ajax
             wp_delete_post(2, true);
             wp_delete_post(3, true);
 
+            // Start each import run from a clean media-cache state.
+            require_once AARAMBHA_DS_CLASSES . 'importer/class-aarambha-ds-media-cache.php';
+            $theme = aarambha_ds_get_theme();
+            delete_site_transient("aarambha_ds_mediacache_{$theme}_{$slug}");
+            Aarambha_DS_Media_Cache::cleanup(
+                Aarambha_DS_Media_Cache::cache_dir(aarambha_ds_get_demos_dir($slug))
+            );
+
             $this->sendSuccess([
                 'files'  => $writtenFiles,
                 'steps'  => $steps,
@@ -359,6 +400,51 @@ class Aarambha_DS_Ajax
         ]);
     }
 
+    /**
+     * Resolve the content step's file value into a list of absolute WXR paths.
+     *
+     * `files['content']` may be a plain filename, an array of filenames, or an
+     * array of `['file' => 'name.xml']` entries.
+     *
+     * @param  string       $demosDir Absolute path to the demo's folder.
+     * @param  string|array $content  Raw value from files['content'].
+     * @return string[] Existing .xml file paths.
+     */
+    private function resolveContentFiles($demosDir, $content)
+    {
+        $candidates = is_array($content) ? $content : [$content];
+        $paths      = [];
+
+        foreach ($candidates as $candidate) {
+            $base = is_array($candidate) && isset($candidate['file']) ? $candidate['file'] : $candidate;
+
+            if (empty($base) || !is_string($base)) {
+                continue;
+            }
+
+            $path = wp_normalize_path("{$demosDir}/{$base}");
+
+            if (file_exists($path)) {
+                $paths[] = $path;
+            }
+        }
+
+        return $paths;
+    }
+
+    /**
+     * Content import.
+     *
+     * This step runs in two phases across several AJAX round-trips so a slow
+     * demo server can never make one request outlast the front-end proxy
+     * timeout:
+     *
+     *   Phase 1 - download the demo's attachments into a local cache, a small
+     *             batch per request, replying with action "content-import" so
+     *             the JS re-calls this same step until the cache is complete.
+     *   Phase 2 - run the WXR import with remote media served from that cache,
+     *             then advance to the next step.
+     */
     public function importContent()
     {
         $this->startBuffer();
@@ -370,30 +456,73 @@ class Aarambha_DS_Ajax
         $steps = aarambha_ds_sanitize_text_or_array_field($_REQUEST['steps']);
         $index = isset($_REQUEST['stepsIndex']) ? absint($_REQUEST['stepsIndex']) + 1 : 1;
 
-        $demosDir = aarambha_ds_get_demos_dir($slug);
-        $filename = isset($files['content']) ? $files['content'] : null;
+        $demosDir     = aarambha_ds_get_demos_dir($slug);
+        $contentFiles = $this->resolveContentFiles($demosDir, isset($files['content']) ? $files['content'] : null);
 
-        $result = [
+        if (empty($contentFiles)) {
+            $this->sendError([
+                'title'   => esc_html__('Import Failed', 'aarambha-demo-sites'),
+                'message' => esc_html__('No content file provided for import.', 'aarambha-demo-sites'),
+            ]);
+        }
+
+        require_once AARAMBHA_DS_CLASSES . 'importer/class-aarambha-ds-media-cache.php';
+
+        $theme     = aarambha_ds_get_theme();
+        $stateKey  = "aarambha_ds_mediacache_{$theme}_{$slug}";
+        $cacheDir  = Aarambha_DS_Media_Cache::cache_dir($demosDir);
+        $batchSize = (int) apply_filters('aarambha_ds_media_batch_size', 10);
+        $state     = get_site_transient($stateKey);
+
+        if (!is_array($state) || !isset($state['urls'], $state['offset'])) {
+            $urls = [];
+            foreach ($contentFiles as $wxr) {
+                $urls = array_merge($urls, Aarambha_DS_Media_Cache::collect_urls($wxr));
+            }
+            $urls  = array_values(array_unique($urls));
+            $state = ['urls' => $urls, 'offset' => 0, 'total' => count($urls)];
+            set_site_transient($stateKey, $state, HOUR_IN_SECONDS);
+        }
+
+        // -- Phase 1: still pre-downloading media --------------------------------
+        if ($state['total'] > 0 && $state['offset'] < $state['total']) {
+            $consumed        = Aarambha_DS_Media_Cache::cache_batch($state['urls'], $state['offset'], $batchSize, $cacheDir);
+            $state['offset'] = min($state['total'], $state['offset'] + max(1, (int) $consumed));
+            set_site_transient($stateKey, $state, HOUR_IN_SECONDS);
+
+            $this->sendSuccess([
+                'action'   => 'content-import', // JS repeats this step
+                'nonce'    => wp_create_nonce('import-content'),
+                'steps'    => $steps,
+                'files'    => $files,
+                'slug'     => $slug,
+                'progress' => ['done' => $state['offset'], 'total' => $state['total']],
+                'message'  => sprintf(
+                    /* translators: 1: files done, 2: total files */
+                    esc_html__('Downloading media %1$d / %2$d …', 'aarambha-demo-sites'),
+                    $state['offset'],
+                    $state['total']
+                ),
+            ]);
+        }
+
+        // -- Phase 2: media cached, run the real import -------------------------
+        $mediaDir = is_dir($cacheDir) ? $cacheDir : '';
+        $result   = [
             'action'  => 'terminate',
             'message' => esc_html__('No content file provided for import.', 'aarambha-demo-sites'),
         ];
 
-        if (is_array($filename)) {
-            foreach ($filename as $candidate) {
-                $base = is_array($candidate) && isset($candidate['file']) ? $candidate['file'] : $candidate;
-                if (empty($base)) continue;
+        foreach ($contentFiles as $wxr) {
+            $result = Aarambha_DS()->core()->content($wxr, $mediaDir);
 
-                $file   = wp_normalize_path("{$demosDir}/{$base}");
-                $result = Aarambha_DS()->core()->content($file);
-
-                if (isset($result['action']) && 'import-customize' === $result['action']) {
-                    break;
-                }
+            if (isset($result['action']) && 'terminate' === $result['action']) {
+                break;
             }
-        } elseif (!empty($filename)) {
-            $file   = wp_normalize_path("{$demosDir}/{$filename}");
-            $result = Aarambha_DS()->core()->content($file);
         }
+
+        delete_site_transient($stateKey);
+        Aarambha_DS_Media_Cache::cleanup($cacheDir);
 
         if (isset($result['action']) && 'terminate' === $result['action']) {
             $this->sendError([
@@ -603,10 +732,12 @@ class Aarambha_DS_Ajax
         $this->verifyNonce($_REQUEST['nonce'], "import-{$step}");
 
         $slug       = sanitize_text_field($_REQUEST['slug']);
-        $demo       = Aarambha_DS()->demo($slug);
-        $navigation = aarambha_ds_sanitize_text_or_array_field($demo['menus']);
+        $demo       = $this->resolveDemo($slug);
+        $navigation = isset($demo['menus']) ? aarambha_ds_sanitize_text_or_array_field($demo['menus']) : [];
 
-        Aarambha_DS()->core()->setupNavigation($navigation);
+        if (is_array($navigation) && count($navigation) > 0) {
+            Aarambha_DS()->core()->setupNavigation($navigation);
+        }
 
         $steps    = aarambha_ds_sanitize_text_or_array_field($_REQUEST['steps']);
         $index    = absint($_REQUEST['stepsIndex']) + 1;
@@ -635,15 +766,15 @@ class Aarambha_DS_Ajax
         $this->verifyNonce($_REQUEST['nonce'], "import-{$step}");
 
         $slug  = sanitize_text_field($_REQUEST['slug']);
-        $demo  = Aarambha_DS()->demo($slug);
-        $pages = aarambha_ds_sanitize_text_or_array_field($demo['pages']);
+        $demo  = $this->resolveDemo($slug);
+        $pages = isset($demo['pages']) ? aarambha_ds_sanitize_text_or_array_field($demo['pages']) : [];
 
         $wcSupport = !empty($demo['wcSupport']);
         $frontPage = isset($pages['homepage']) ? $pages['homepage'] : false;
         $blogPage  = isset($pages['postpage']) ? $pages['postpage'] : false;
 
         if ($frontPage) {
-            $homePage = get_page_by_title($frontPage);
+            $homePage = aarambha_ds_get_page_by_title($frontPage);
             if (isset($homePage->ID)) {
                 update_option('show_on_front', 'page');
                 update_option('page_on_front', $homePage->ID);
@@ -651,7 +782,7 @@ class Aarambha_DS_Ajax
         }
 
         if ($blogPage) {
-            $postsPage = get_page_by_title($blogPage);
+            $postsPage = aarambha_ds_get_page_by_title($blogPage);
             if (isset($postsPage->ID)) {
                 update_option('page_for_posts', $postsPage->ID);
             }
@@ -694,8 +825,8 @@ class Aarambha_DS_Ajax
 
             if (function_exists('WC')) {
                 foreach ($wc_pages as $wc_slug => $title) {
-                    $woopage = get_page_by_title(html_entity_decode($title));
-                    if (isset($woopage) && property_exists($woopage, 'ID')) {
+                    $woopage = aarambha_ds_get_page_by_title(html_entity_decode($title));
+                    if ($woopage instanceof WP_Post) {
                         update_option("woocommerce_{$wc_slug}_page_id", $woopage->ID);
                     }
                 }
